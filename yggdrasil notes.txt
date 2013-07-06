@@ -1,0 +1,30 @@
+Yggdrasil auth service:
+
+clientToken is a random UUID that is created the first time the launcher runs
+agent is {"name":"Minecraft","version":1} for now. May change later.
+make accessToken by getting an MD5 checksum of username, password, and random time string
+id will be MD5 of the username
+
+First time:
+POST https://authserver.mojang.com/authenticate
+{"agent":{"name":"Minecraft","version":1},"username":"download333@gmail.com","password":"mynePWDgigity","clientToken":"b1629dd4-2d96-4e04-b35e-81638b10fc7d"}
+-> {"accessToken":"441fcc6e840e4bffaf54062bded039b1","clientToken":"b1629dd4-2d96-4e04-b35e-81638b10fc7d","availableProfiles":[{"id":"eb840c9b97324be7a9d284e64019633f","name":"download13"}],"selectedProfile":{"id":"eb840c9b97324be7a9d284e64019633f","name":"download13"}}
+// return clientToken, see above for accessToken
+!-> {"error":"ForbiddenOperationException","errorMessage":"Invalid credentials. Invalid username or password."}
+// Need to send back the uuid and displayName that will be associated with the account
+
+
+Primed:
+POST https://authserver.mojang.com/refresh
+{"clientToken":"09796507-4124-4683-8020-312d7627b568","accessToken":"0579b8acd88b400ba28776d3a7f81681"}
+// clientToken is for client, accessToken is user-specific
+-> {"accessToken":"f5aaf72f76684c5fb88a07d4f2221fba","clientToken":"09796507-4124-4683-8020-312d7627b568","selectedProfile":{"id":"eb840c9b97324be7a9d284e64019633f","name":"download13"}}
+!-> {"error":"ForbiddenOperationException","errorMessage":"Invalid token."}
+// Need to send back the uuid and displayName that are associated with the account
+
+
+Logout:
+POST https://authserver.mojang.com/invalidate
+{"accessToken":"b2384375057e4c7aa23a33c4989bdfc4","clientToken":"d55cab5c-acd2-4ca0-813a-89e654c69ef6"}
+->
+// Reply appears to be empty string
