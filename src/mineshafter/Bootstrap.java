@@ -41,7 +41,7 @@ public class Bootstrap extends JFrame {
 	private final File packedLauncherJar;
 	private final File packedLauncherJarNew;
 	private final File patchedLauncherJar;
-	
+
 	public Bootstrap() {
 		super("Minecraft Launcher");
 		this.workDir = Util.getWorkingDirectory();
@@ -49,68 +49,68 @@ public class Bootstrap extends JFrame {
 		this.packedLauncherJar = new File(workDir, "launcher.pack.lzma");
 		this.packedLauncherJarNew = new File(workDir, "launcher.pack.lzma.new");
 		this.patchedLauncherJar = new File(workDir, "launcher_mcpatched.jar");
-		
+
 		setSize(854, 480);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		
+
 		JTextArea textArea = new JTextArea();
-	    textArea.setLineWrap(true);
-	    textArea.setEditable(false);
-	    textArea.setFont(new Font("Monospaced", 0, 12));
-	    
-	    JScrollPane scrollPane = new JScrollPane(textArea);
-	    scrollPane.setBorder(null);
-	    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-	    add(scrollPane);
-		
+		textArea.setLineWrap(true);
+		textArea.setEditable(false);
+		textArea.setFont(new Font("Monospaced", 0, 12));
+
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		scrollPane.setBorder(null);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		add(scrollPane);
+
 		setLocationRelativeTo(null);
 		setVisible(true);
 	}
-	
+
 	public void run() {
-		if(!workDir.isDirectory()) workDir.mkdir();
-		if(packedLauncherJarNew.isFile()) renameNew();
-		
+		if (!workDir.isDirectory()) workDir.mkdir();
+		if (packedLauncherJarNew.isFile()) renameNew();
+
 		String md5 = null;
-		if(this.packedLauncherJar.exists()) md5 = Util.getMd5(this.packedLauncherJar);
-		if(!Util.grabLauncher(md5, this.packedLauncherJarNew)) System.out.println("New launcher not downloaded");
+		if (this.packedLauncherJar.exists()) md5 = Util.getMd5(this.packedLauncherJar);
+		if (!Util.grabLauncher(md5, this.packedLauncherJarNew)) System.out.println("New launcher not downloaded");
 		renameNew();
 		unpack();
 		patchLauncher();
 		startLauncher();
 	}
-	
+
 	public void renameNew() {
-		if(this.packedLauncherJar.exists() && !this.packedLauncherJar.isFile()) this.packedLauncherJar.delete();
-		if(this.packedLauncherJarNew.isFile()) this.packedLauncherJarNew.renameTo(this.packedLauncherJar);
+		if (this.packedLauncherJar.exists() && !this.packedLauncherJar.isFile()) this.packedLauncherJar.delete();
+		if (this.packedLauncherJarNew.isFile()) this.packedLauncherJarNew.renameTo(this.packedLauncherJar);
 	}
-	
+
 	public void unpack() {
-		if(!this.packedLauncherJar.exists()) return;
-		
+		if (!this.packedLauncherJar.exists()) return;
+
 		String path = this.packedLauncherJar.getAbsolutePath();
 		File unpacked = new File(path.substring(0, path.lastIndexOf('.')));
-		
+
 		try {
 			BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(this.packedLauncherJar));
 			BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(unpacked));
-			
+
 			byte[] properties = new byte[5];
 			inStream.read(properties, 0, 5);
 			Decoder decoder = new Decoder();
 			decoder.SetDecoderProperties(properties);
 			long outSize = 0;
-			for(int i = 0; i < 8; i++) {
+			for (int i = 0; i < 8; i++) {
 				int v = inStream.read();
-				outSize |= ((long)v) << (8 * i);
+				outSize |= ((long) v) << (8 * i);
 			}
-			
+
 			decoder.Code(inStream, outStream, outSize);
-			
+
 			inStream.close();
 			outStream.flush();
 			outStream.close();
-			
+
 			JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(this.launcherJar));
 			Pack200.newUnpacker().unpack(unpacked, jarOut);
 			jarOut.close();
@@ -120,47 +120,47 @@ public class Bootstrap extends JFrame {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void patchLauncher() {
-		if(!this.launcherJar.exists()) return;
-		
+		if (!this.launcherJar.exists()) return;
+
 		try {
 			ZipInputStream inStream = new ZipInputStream(new FileInputStream(this.launcherJar));
 			ZipOutputStream outStream = new ZipOutputStream(new FileOutputStream(this.patchedLauncherJar));
 			ZipEntry entry;
 			String n;
 			InputStream dataSource;
-			while((entry = inStream.getNextEntry()) != null) {
+			while ((entry = inStream.getNextEntry()) != null) {
 				n = entry.getName();
-				if(n.startsWith("META-INF/") && (n.endsWith(".DSA")  || n.endsWith(".RSA") || n.endsWith(".SF"))) continue;
-				
+				if (n.startsWith("META-INF/") && (n.endsWith(".DSA") || n.endsWith(".RSA") || n.endsWith(".SF"))) continue;
+
 				outStream.putNextEntry(entry);
-				if(n.equals("META-INF/MANIFEST.MF")) dataSource = new ByteArrayInputStream("Manifest-Version: 1.0\n".getBytes());
-				else if(n.equals("net/minecraft/launcher/Http.class")) dataSource = Resources.load("resources/Http.class");
-				else if(n.equals("net/minecraft/launcher/updater/download/Downloadable.class")) dataSource = Resources.load("resources/Downloadable.class");
+				if (n.equals("META-INF/MANIFEST.MF")) dataSource = new ByteArrayInputStream("Manifest-Version: 1.0\n".getBytes());
+				else if (n.equals("net/minecraft/launcher/Http.class")) dataSource = Resources.load("resources/Http.class");
+				else if (n.equals("net/minecraft/launcher/updater/download/Downloadable.class")) dataSource = Resources.load("resources/Downloadable.class");
 				else dataSource = inStream;
 				Streams.pipeStreams(dataSource, outStream);
 				outStream.flush();
 			}
 			inStream.close();
 			outStream.close();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println("Error while patching launcher:");
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void startLauncher() {
 		YggdrasilProxy proxy = new YggdrasilProxy();
 		proxy.start();
 		int proxyPort = proxy.getPort();
-		
+
 		System.setErr(System.out);
-		//System.setProperty("http.proxyHost", "127.0.0.1");
-		//System.setProperty("http.proxyPort", Integer.toString(proxyPort));
+		// System.setProperty("http.proxyHost", "127.0.0.1");
+		// System.setProperty("http.proxyPort", Integer.toString(proxyPort));
 		System.setProperty("java.net.preferIPv4Stack", "true");
-		Proxy proxyInfo = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", proxyPort));
-		
+		Proxy proxyInfo = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", proxyPort));
+
 		try {
 			Class<?> launcher = new URLClassLoader(new URL[] { this.patchedLauncherJar.toURI().toURL() }).loadClass("net.minecraft.launcher.Launcher");
 			Constructor<?> ctor = launcher.getConstructor(new Class[] { JFrame.class, File.class, Proxy.class, PasswordAuthentication.class, java.lang.String[].class, Integer.class });
@@ -170,16 +170,16 @@ public class Bootstrap extends JFrame {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		float v = Util.getCurrentBootstrapVersion();
 		System.out.println("Current proxy version: " + bootstrapVersion);
 		System.out.println("Gotten proxy version: " + v);
-		if(bootstrapVersion < v) {
+		if (bootstrapVersion < v) {
 			JOptionPane.showMessageDialog(null, "A new version of Mineshafter is available at http://mineshafter.info/\nGo get it.", "Update Available", JOptionPane.PLAIN_MESSAGE);
 			System.exit(0);
 		}
-		
+
 		Bootstrap frame = new Bootstrap();
 		frame.run();
 	}
