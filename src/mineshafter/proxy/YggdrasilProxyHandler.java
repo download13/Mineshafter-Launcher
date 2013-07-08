@@ -3,74 +3,96 @@ package mineshafter.proxy;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
-import java.net.Socket;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.gson.Gson;
 
-import mineshafter.util.Streams;
+import mineshafter.Util;
 
-public class YggdrasilProxyHandler extends Thread {
-	private DataInputStream fromClient;
-	private DataOutputStream toClient;
-	private Socket connection;
+public class YggdrasilProxyHandler implements HttpProxyHandler, SocksProxyHandler {
+	public static String authServer = "mineshafter.info";
 
-	private YggdrasilProxy proxy;
+	public static Pattern SKIN_URL = Pattern.compile("http://skins\\.minecraft\\.net/MinecraftSkins/(.+?)\\.png");
+	public static Pattern CLOAK_URL = Pattern.compile("http://skins\\.minecraft\\.net/MinecraftCloaks/(.+?)\\.png");
+	public static Pattern AUTHSERVER_URL = Pattern.compile("http://authserver\\.mojang\\.com/(.*)");
 
-	private static String[] BLACKLISTED_HEADERS = new String[] { "Connection", "Proxy-Connection", "Transfer-Encoding" };
+	private Map<String, byte[]> skinCache = new Hashtable<String, byte[]>();
+	private Map<String, byte[]> cloakCache = new Hashtable<String, byte[]>();
 
-	public YggdrasilProxyHandler(YggdrasilProxy proxy, Socket conn) throws IOException {
-		setName("YggdrasilProxyHandler Thread");
+	private YggdrasilImpersonator imp = new YggdrasilImpersonator(new File(Util.getWorkingDirectory(), "launcher_profiles.json"));
 
-		this.proxy = proxy;
+	public YggdrasilProxyHandler() {}
 
-		connection = conn;
-		fromClient = new DataInputStream(conn.getInputStream());
-		toClient = new DataOutputStream(conn.getOutputStream());
-	}
+	public boolean onConnect(InputStream in, OutputStream out, SocksMessage msg) {
+		in.mark(0xffff);
+		String firstLine = readUntil(in, '\n');
+		String[] request = firstLine.split(" ");
+		if(request.length != 3) {
+			System.out.println("Not an HTTP request: " + firstLine);
+			try {
+				in.reset();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return false;
+		}
+		String method = request[0].toUpperCase();
+		String path = request[1];
 
-	public void run() {
-		HashMap<String, String> headers = new HashMap<String, String>();
-		System.out.println("Proxy Request Started");
-		// Read the incoming request
-		String[] requestLine = readUntil(fromClient, '\n').split(" ");
-		String method = requestLine[0].trim().toUpperCase();
-		String url = requestLine[1].trim();
-
-		System.out.println("Proxy Request: " + method + " " + url);
-
-		// Read the incoming headers
-		// System.out.println("Headers:");
+		Map<String, String> headers = new HashMap<String, String>();
 		String header;
 		do {
-			header = readUntil(fromClient, '\n').trim();
-			// System.out.println("H: " + header + ", " + header.length());
+			header = readUntil(in, '\n');
+			header = header.trim();
 			int splitPoint = header.indexOf(':');
 			if (splitPoint != -1) {
 				headers.put(header.substring(0, splitPoint).toLowerCase().trim(), header.substring(splitPoint + 1).trim());
 			}
 		} while (header.length() > 0);
 
-		Matcher skinMatcher = YggdrasilProxy.SKIN_URL.matcher(url);
-		Matcher cloakMatcher = YggdrasilProxy.CLOAK_URL.matcher(url);
-		Matcher authServerMatcher = YggdrasilProxy.AUTHSERVER_URL.matcher(url);
+		String url = "http://" + headers.get("host") + path;
+		System.out.println("Proxy - onConnect - url: " + url);
+
+		if (method.equals("GET")) {
+			if (onGET(url, headers, in, out)) return true;
+		} else if (method.equals("POST")) {
+			if (onPOST(url, headers, in, out)) return true;
+		} else if (method.equals("HEAD")) {
+			if (onHEAD(url, headers, in, out)) return true;
+		}
+		try {
+			in.reset();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public boolean onBind() {
+		// XXX Figure out what to do here later
+		return false;
+	}
+
+	public boolean onGET(String url, Map<String, String> headers, InputStream in, OutputStream out) {
+		System.out.println("Proxy - onGET: " + url);
+		Matcher skinMatcher = SKIN_URL.matcher(url);
+		Matcher cloakMatcher = CLOAK_URL.matcher(url);
 
 		byte[] data = null;
 
@@ -78,233 +100,115 @@ public class YggdrasilProxyHandler extends Thread {
 			System.out.println("Proxy: Skin");
 
 			String username = skinMatcher.group(1);
-			if (proxy.skinCache.containsKey(username)) { // Is the skin in the
-															// cache?
-				System.out.println("Skin from cache");
-
-				data = proxy.skinCache.get(username); // Then get it from there
+			if (skinCache.containsKey(username)) {
+				data = skinCache.get(username);
 			} else {
-				url = "http://" + YggdrasilProxy.authServer + "/mcapi/skin/" + username + ".png";
+				url = "http://" + authServer + "/mcapi/skin/" + username + ".png";
 				System.out.println("To: " + url);
-
-				data = getRequest(url); // Then get it...
+				data = getRequest(url);
 				System.out.println("Response length: " + data.length);
-
-				proxy.skinCache.put(username, data); // And put it in there
+				skinCache.put(username, data);
+				sendResponse(out, "image/png", data);
+				return true;
 			}
 
 		} else if (cloakMatcher.matches()) {
 			System.out.println("Proxy: Cloak");
 
 			String username = cloakMatcher.group(1);
-			if (proxy.cloakCache.containsKey(username)) {
-				System.out.println("Cloak from cache");
-				data = proxy.cloakCache.get(username);
+			if (cloakCache.containsKey(username)) {
+				data = cloakCache.get(username);
 			} else {
-				url = "http://" + YggdrasilProxy.authServer + "/mcapi/cloak/" + username + ".png";
+				url = "http://" + authServer + "/mcapi/cloak/" + username + ".png";
 				System.out.println("To: " + url);
-
 				data = getRequest(url);
 				System.out.println("Response length: " + data.length);
-
-				proxy.cloakCache.put(username, data);
+				cloakCache.put(username, data);
+				sendResponse(out, "image/png", data);
+				return true;
 			}
+		}
 
-		} else if (authServerMatcher.matches()) {
-			System.out.println("Proxy: authserver");
+		return false;
+	}
+
+	public boolean onPOST(String url, Map<String, String> headers, InputStream in, OutputStream out) {
+		int contentLength = Integer.parseInt(headers.get("content-length"));
+		Matcher authServerMatcher = AUTHSERVER_URL.matcher(url);
+
+		if (authServerMatcher.matches()) {
+			System.out.println("Proxy: Authserver");
 
 			String endpoint = authServerMatcher.group(1);
 			try {
-				int postlen = Integer.parseInt(headers.get("content-length"));
-				char[] postdata = new char[postlen];
-				InputStreamReader reader = new InputStreamReader(fromClient);
-				reader.read(postdata);
-				String postedJSON = new String(postdata);
-				data = authServerEndpoint(endpoint, postedJSON).getBytes();
+				char[] body = new char[contentLength];
+				InputStreamReader reader = new InputStreamReader(in);
+				reader.read(body);
+				String postedJSON = new String(body);
+				String response = authServerEndpoint(endpoint, postedJSON);
+				sendResponse(out, "application/json", response);
 
 			} catch (IOException e) {
 				System.out.println("Unable to read POST data from getversion request");
 				e.printStackTrace();
 			}
-
-		} else {
-			System.out.println("Proxy: No handler. Piping.");
-
-			try {
-				if (!url.startsWith("http://") && !url.startsWith("https://")) {
-					url = "http://" + url;
-				}
-				URL u = new URL(url);
-				if (method.equals("CONNECT")) {
-					int port = u.getPort();
-					if (port == -1) port = 80;
-					System.out.println("proxy osemthing url: " + u.getHost() + " , " + u.getPort());
-					Socket sock = new Socket(u.getHost(), port);
-
-					Streams.pipeStreamsActive(fromClient, new BufferedOutputStream(sock.getOutputStream()));
-					Streams.pipeStreamsActive(new BufferedInputStream(sock.getInputStream()), toClient);
-					return;
-
-				} else if (method.equals("GET") || method.equals("POST")) {
-					HttpURLConnection c = (HttpURLConnection) u.openConnection(Proxy.NO_PROXY);
-					c.setRequestMethod(method);
-					boolean post = method.equals("POST");
-
-					for (String k : headers.keySet()) {
-						c.setRequestProperty(k, headers.get(k)); // TODO Might
-																	// need to
-																	// blacklist
-																	// these as
-																	// well
-																	// later
-					}
-
-					if (post) {
-						c.setDoInput(true);
-						c.setDoOutput(true);
-						c.setUseCaches(false);
-						c.connect();
-						int postlen = Integer.parseInt(headers.get("content-length"));
-						byte[] postdata = new byte[postlen];
-						fromClient.read(postdata);
-
-						DataOutputStream os = new DataOutputStream(c.getOutputStream());
-						os.write(postdata);
-					}
-					// Collect the headers from the server and retransmit them
-					int responseCode = c.getResponseCode();
-					String res = "HTTP/1.0 " + responseCode + " " + c.getResponseMessage() + "\r\n";
-					res += "Connection: close\r\nProxy-Connection: close\r\n";
-
-					Map<String, List<String>> h = c.getHeaderFields();
-					headerloop: for (String k : h.keySet()) {
-						if (k == null) continue;
-						k = k.trim();
-						for (String forbiddenHeader : BLACKLISTED_HEADERS) {
-							if (k.equalsIgnoreCase(forbiddenHeader)) continue headerloop;
-						}
-
-						List<String> vals = h.get(k);
-						for (String v : vals) {
-							res += k + ": " + v + "\r\n";
-						}
-					}
-					res += "\r\n";
-
-					// System.out.println(res);
-					int size = -1;
-					if (responseCode / 100 != 5) {
-						toClient.writeBytes(res);
-						size = Streams.pipeStreams(c.getInputStream(), toClient);
-					}
-
-					toClient.close();
-					connection.close();
-
-					System.out.println("Piping finished, data size: " + size);
-
-				} else if (method.equals("HEAD")) {
-					HttpURLConnection c = (HttpURLConnection) u.openConnection(Proxy.NO_PROXY);
-					c.setRequestMethod("HEAD");
-
-					for (String k : headers.keySet()) {
-						c.setRequestProperty(k, headers.get(k));
-					}
-
-					String res = "HTTP/1.0 " + c.getResponseCode() + " " + c.getResponseMessage() + "\r\n";
-					res += "Proxy-Connection: close\r\n";
-
-					java.util.Map<String, java.util.List<String>> h = c.getHeaderFields();
-					for (String k : h.keySet()) {
-						if (k == null) continue;
-						java.util.List<String> vals = h.get(k);
-						for (String v : vals) {
-							res += k + ": " + v + "\r\n";
-						}
-					}
-					res += "\r\n";
-
-					// System.out.println(res);
-
-					toClient.writeBytes(res); // TODO Occasional exception
-												// socket write error
-					toClient.close();
-					connection.close();
-
-				} else {
-					System.out.println("UNEXPECTED REQUEST TYPE: " + method);
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			return;
+			return true;
 		}
 
+		return false;
+	}
+
+	public boolean onHEAD(String url, Map<String, String> headers, InputStream in, OutputStream out) {
+		return false;
+	}
+
+	public boolean onCONNECT(String url, Map<String, String> headers, InputStream in, OutputStream out) {
+		return false;
+	}
+
+	private void sendResponse(OutputStream out, String contentType, String data) {
+		sendResponse(out, contentType, data.getBytes());
+	}
+
+	private void sendResponse(OutputStream out, String contentType, byte[] data) {
+		OutputStreamWriter writer = new OutputStreamWriter(out);
 		try {
-			if (data != null) {
-				toClient.writeBytes("HTTP/1.0 200 OK\r\nConnection: close\r\nProxy-Connection: close\r\nContent-Length: " + data.length + "\r\n");
-				toClient.writeBytes("\r\n");
-				toClient.write(data);
-				toClient.flush();
+			writer.append("HTTP/1.0 200 OK\r\nConnection: close\r\nProxy-Connection: close\r\n");
+			writer.append("Content-Length: " + Integer.toString(data.length) + "\r\n");
+			if (contentType != null) {
+				writer.append("Content-Type: " + contentType + "\r\n\r\n");
 			}
-			fromClient.close();
-			toClient.close();
-			connection.close();
-			// System.out.println(data.length);
-			// System.out.println(new String(data));
+			writer.flush();
+			out.write(data);
+			out.flush();
+			out.close();
 		} catch (IOException e) {
+			System.out.println("Proxy - sendResponse error:");
 			e.printStackTrace();
 		}
 	}
 
 	private String authServerEndpoint(String endpoint, String postedJSON) {
-		Map<String, ProfileAuthentication> profiles = this.proxy.profiles;
 		Gson gson = new Gson();
-		YggdrasilRequestData data = gson.fromJson(postedJSON, YggdrasilRequestData.class);
+		YggdrasilRequest data = gson.fromJson(postedJSON, YggdrasilRequest.class);
 
 		System.out.println("Proxy postedJSON: " + postedJSON);
-		try {
-			if (endpoint.equalsIgnoreCase("authenticate")) {
-				MessageDigest accessTokenHash = MessageDigest.getInstance("MD5");
-				accessTokenHash.update(data.username.getBytes());
-				accessTokenHash.update(data.password.getBytes());
-				accessTokenHash.update(Long.toString(System.currentTimeMillis()).getBytes());
-				String accessToken = String.format("%1$032x", new Object[] { new BigInteger(1, accessTokenHash.digest()) });
-				MessageDigest idHash = MessageDigest.getInstance("MD5");
-				idHash.update(data.username.getBytes());
-				String id = String.format("%1$032x", new Object[] { new BigInteger(1, idHash.digest()) });
+		if (endpoint.equalsIgnoreCase("authenticate")) {
+			String reply = imp.authenticate(data);
+			System.out.println("Proxy authenticate response: " + reply);
+			return reply;
 
-				profiles.put(accessToken, new ProfileAuthentication(id, data.username));
-				ProfileResponse pr = new ProfileResponse(id, data.username);
-				YggdrasilAuthResponse r = new YggdrasilAuthResponse(data.clientToken, accessToken, pr, pr);
-				System.out.println("Proxy authenticate response: " + gson.toJson(r));
-				return gson.toJson(r);
+		} else if (endpoint.equalsIgnoreCase("refresh")) {
+			String reply = imp.refresh(data);
+			System.out.println("Proxy refresh response: " + reply);
+			return reply;
 
-			} else if (endpoint.equalsIgnoreCase("refresh")) {
-				MessageDigest accessTokenHash = MessageDigest.getInstance("MD5");
-				accessTokenHash.update(data.accessToken.getBytes());
-				accessTokenHash.update(Long.toString(System.currentTimeMillis()).getBytes());
-				String accessToken = String.format("%1$032x", new Object[] { new BigInteger(1, accessTokenHash.digest()) });
+		} else if (endpoint.equalsIgnoreCase("invalidate")) {
+			String reply = imp.invalidate(data);
+			return reply;
 
-				ProfileAuthentication user = profiles.get(data.accessToken);
-				if (user == null) { return "{\"error\":\"ForbiddenOperationException\",\"errorMessage\":\"Invalid token.\"}"; }
-				profiles.remove(data.accessToken);
-				profiles.put(accessToken, user);
-				String displayName = user.displayName == null ? user.username : user.displayName;
-				YggdrasilAuthResponse r = new YggdrasilAuthResponse(data.clientToken, accessToken, new ProfileResponse(user.uuid, displayName), null);
-				System.out.println("Proxy refresh response: " + gson.toJson(r));
-				return gson.toJson(r);
-
-			} else if (endpoint.equalsIgnoreCase("invalidate")) {
-				profiles.remove(data.accessToken);
-				return "";
-			} else {
-				return "{\"error\":\"ForbiddenOperationException\",\"errorMessage\":\"Invalid credentials. Invalid username or password.\"}";
-			}
-		} catch (NoSuchAlgorithmException e) {
-			return null;
+		} else {
+			return "";
 		}
 	}
 
@@ -312,15 +216,15 @@ public class YggdrasilProxyHandler extends Thread {
 		try {
 			HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection(Proxy.NO_PROXY);
 			conn.setUseCaches(false);
-			conn.setInstanceFollowRedirects(false);
+			conn.setInstanceFollowRedirects(true);
 			Map<String, List<String>> requestHeaders = conn.getRequestProperties();
 			int code = conn.getResponseCode();
 
-			if (code == 301 || code == 302 || code == 303) {
+			if (code / 100 == 3) {
 				System.out.println("Java didn't redirect automatically, going manual: " + Integer.toString(code));
-				String l = conn.getHeaderField("location").trim();
-				System.out.println("Manual redirection to: " + l);
-				return getRequest(l);
+				String loc = conn.getHeaderField("location").trim();
+				System.out.println("Manual redirection to: " + loc);
+				return getRequest(loc);
 			}
 
 			System.out.println("Response: " + code);
@@ -434,33 +338,20 @@ public class YggdrasilProxyHandler extends Thread {
 		return out.toByteArray();
 	}
 
-	public static String readUntil(DataInputStream is, String endSequence) {
+	public static String readUntil(InputStream is, String endSequence) {
 		return readUntil(is, endSequence.getBytes());
 	}
 
-	public static String readUntil(DataInputStream is, char endSequence) {
+	public static String readUntil(InputStream is, char endSequence) {
 		return readUntil(is, new byte[] { (byte) endSequence });
 	}
 
-	public static String readUntil(DataInputStream is, byte endSequence) {
+	public static String readUntil(InputStream is, byte endSequence) {
 		return readUntil(is, new byte[] { endSequence });
 	}
 
-	public static String readUntil(DataInputStream is, byte[] endSequence) { // If
-																				// there
-																				// is
-																				// an
-																				// edge
-																				// case,
-																				// make
-																				// sure
-																				// we
-																				// can
-																				// see
-																				// it
+	public static String readUntil(InputStream is, byte[] endSequence) { // If there is an edge case, make sure we can see it
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-		String r = null;
 
 		try {
 			int i = 0;
@@ -468,16 +359,12 @@ public class YggdrasilProxyHandler extends Thread {
 				boolean end = false;
 				byte b;
 				try {
-					b = is.readByte(); // Read a byte
+					b = (byte) is.read();
 				} catch (EOFException e) {
 					break;
 				}
-				if (b == endSequence[i]) { // If equal to current byte of
-											// endSequence
-					if (i == endSequence.length - 1) {
-						end = true; // If we hit the end of endSequence, we're
-									// done
-					}
+				if (b == endSequence[i]) { // If equal to current byte of endSequence
+					if (i == endSequence.length - 1) end = true; // If we hit the end of endSequence, we're done
 					i++; // Increment for next round
 				} else {
 					i = 0; // Reset
@@ -493,12 +380,9 @@ public class YggdrasilProxyHandler extends Thread {
 		}
 
 		try {
-			r = out.toString("UTF-8");
-		} catch (java.io.UnsupportedEncodingException ex) {
-			System.out.println("readUntil unable to encode data: " + out.toString());
-			ex.printStackTrace();
-		}
+			return out.toString("UTF-8");
+		} catch (java.io.UnsupportedEncodingException ex) {}
 
-		return r;
+		return null;
 	}
 }

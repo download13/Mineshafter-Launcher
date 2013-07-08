@@ -28,7 +28,9 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 
-import mineshafter.proxy.YggdrasilProxy;
+import mineshafter.proxy.ModularProxy;
+import mineshafter.proxy.SocksProxyConnection;
+import mineshafter.proxy.YggdrasilProxyHandler;
 import mineshafter.util.Resources;
 import mineshafter.util.Streams;
 import SevenZip.Compression.LZMA.*;
@@ -36,6 +38,8 @@ import SevenZip.Compression.LZMA.*;
 public class Bootstrap extends JFrame {
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
+	private static int mineshafterBootstrapVersion = 1;
+
 	private final File workDir;
 	private final File launcherJar;
 	private final File packedLauncherJar;
@@ -151,13 +155,11 @@ public class Bootstrap extends JFrame {
 	}
 
 	public void startLauncher() {
-		YggdrasilProxy proxy = new YggdrasilProxy();
+		ModularProxy proxy = new ModularProxy(SocksProxyConnection.class, (Object) new YggdrasilProxyHandler());
 		proxy.start();
-		int proxyPort = proxy.getPort();
+		int proxyPort = proxy.getListeningPort();
 
 		System.setErr(System.out);
-		// System.setProperty("http.proxyHost", "127.0.0.1");
-		// System.setProperty("http.proxyPort", Integer.toString(proxyPort));
 		System.setProperty("java.net.preferIPv4Stack", "true");
 		Proxy proxyInfo = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", proxyPort));
 
@@ -169,13 +171,14 @@ public class Bootstrap extends JFrame {
 			System.out.println("Error while starting launcher:");
 			e.printStackTrace();
 		}
+
 	}
 
 	public static void main(String[] args) {
 		float v = Util.getCurrentBootstrapVersion();
-		System.out.println("Current proxy version: " + bootstrapVersion);
+		System.out.println("Current proxy version: " + mineshafterBootstrapVersion);
 		System.out.println("Gotten proxy version: " + v);
-		if (bootstrapVersion < v) {
+		if (mineshafterBootstrapVersion < v) {
 			JOptionPane.showMessageDialog(null, "A new version of Mineshafter is available at http://mineshafter.info/\nGo get it.", "Update Available", JOptionPane.PLAIN_MESSAGE);
 			System.exit(0);
 		}
