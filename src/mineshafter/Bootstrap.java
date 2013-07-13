@@ -151,6 +151,7 @@ public class Bootstrap extends JFrame {
 			Class<?> launcher = new URLClassLoader(new URL[] { this.patchedLauncherJar.toURI().toURL() }).loadClass("net.minecraft.launcher.Launcher");
 			Constructor<?> ctor = launcher.getConstructor(new Class[] { JFrame.class, File.class, Proxy.class, PasswordAuthentication.class, java.lang.String[].class, Integer.class });
 			ctor.newInstance(new Object[] { this, this.workDir, proxyInfo, null, new String[] {}, bootstrapVersion });
+			setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); // Fixes closing bug.	
 		} catch (Exception e) {
 			System.out.println("Error while starting launcher:");
 			e.printStackTrace();
