@@ -1,6 +1,5 @@
 package mineshafter;
 
-import java.awt.Font;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -23,9 +22,6 @@ import java.util.zip.ZipOutputStream;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 
 import mineshafter.proxy.ModularProxy;
@@ -36,9 +32,11 @@ import mineshafter.util.Streams;
 import SevenZip.Compression.LZMA.*;
 
 public class Bootstrap extends JFrame {
+	public static Thread mainThread;
+
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 1;
+	private static int mineshafterBootstrapVersion = 2;
 
 	private final File workDir;
 	private final File launcherJar;
@@ -53,22 +51,6 @@ public class Bootstrap extends JFrame {
 		this.packedLauncherJar = new File(workDir, "launcher.pack.lzma");
 		this.packedLauncherJarNew = new File(workDir, "launcher.pack.lzma.new");
 		this.patchedLauncherJar = new File(workDir, "launcher_mcpatched.jar");
-
-		setSize(854, 480);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-		JTextArea textArea = new JTextArea();
-		textArea.setLineWrap(true);
-		textArea.setEditable(false);
-		textArea.setFont(new Font("Monospaced", 0, 12));
-
-		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setBorder(null);
-		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		add(scrollPane);
-
-		setLocationRelativeTo(null);
-		setVisible(true);
 	}
 
 	public void run() {
@@ -127,6 +109,7 @@ public class Bootstrap extends JFrame {
 
 	public void patchLauncher() {
 		if (!this.launcherJar.exists()) return;
+		if (this.patchedLauncherJar.exists()) this.patchedLauncherJar.delete();
 
 		try {
 			ZipInputStream inStream = new ZipInputStream(new FileInputStream(this.launcherJar));
@@ -142,6 +125,7 @@ public class Bootstrap extends JFrame {
 				if (n.equals("META-INF/MANIFEST.MF")) dataSource = new ByteArrayInputStream("Manifest-Version: 1.0\n".getBytes());
 				else if (n.equals("net/minecraft/launcher/Http.class")) dataSource = Resources.load("resources/Http.class");
 				else if (n.equals("net/minecraft/launcher/updater/download/Downloadable.class")) dataSource = Resources.load("resources/Downloadable.class");
+				else if (n.equals("net/minecraft/hopper/Util.class")) dataSource = Resources.load("resources/Util.class");
 				else dataSource = inStream;
 				Streams.pipeStreams(dataSource, outStream);
 				outStream.flush();
@@ -172,9 +156,15 @@ public class Bootstrap extends JFrame {
 			e.printStackTrace();
 		}
 
+		setSize(854, 480);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
+		setVisible(true);
 	}
 
 	public static void main(String[] args) {
+		mainThread = Thread.currentThread();
+
 		float v = Util.getCurrentBootstrapVersion();
 		System.out.println("Current proxy version: " + mineshafterBootstrapVersion);
 		System.out.println("Gotten proxy version: " + v);
