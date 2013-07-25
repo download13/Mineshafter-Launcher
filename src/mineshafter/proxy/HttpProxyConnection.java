@@ -12,7 +12,6 @@ public class HttpProxyConnection implements ProxyConnection {
 	}
 
 	public void start() {
-		/*
 		DataInputStream fromClient = new DataInputStream(clientSock.getInputStream());
 		HashMap<String, String> headers = new HashMap<String, String>();
 		System.out.println("Proxy Request Started");
@@ -25,7 +24,6 @@ public class HttpProxyConnection implements ProxyConnection {
 
 		HttpProxyHandler handler = new YggdrasilProxyHandler(this, clientSock);
 		handler.start();
-		*/
 	}
 
 	public void run() {
