@@ -36,7 +36,7 @@ public class Bootstrap extends JFrame {
 
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 3;
+	private static int mineshafterBootstrapVersion = 4;
 
 	private final File workDir;
 	private final File launcherJar;
@@ -67,8 +67,10 @@ public class Bootstrap extends JFrame {
 	}
 
 	public void renameNew() {
-		if (this.packedLauncherJar.exists() && !this.packedLauncherJar.isFile()) this.packedLauncherJar.delete();
-		if (this.packedLauncherJarNew.isFile()) this.packedLauncherJarNew.renameTo(this.packedLauncherJar);
+		if (this.packedLauncherJarNew.isFile()) {
+			this.packedLauncherJar.delete();
+			this.packedLauncherJarNew.renameTo(this.packedLauncherJar);
+		}
 	}
 
 	public void unpack() {
