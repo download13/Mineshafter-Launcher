@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import mineshafter.Util;
-import mineshafter.proxy.YggdrasilImpersonator.ProfilesJSON.OuterProfile;
-
 import com.google.gson.Gson;
 
 public class YggdrasilImpersonator {
@@ -23,17 +21,16 @@ public class YggdrasilImpersonator {
 
 		try {
 			ProfilesJSON profiles = gson.fromJson(new FileReader(profilesFile), ProfilesJSON.class);
-			Map<String, OuterProfile> ps = profiles.profiles;
+			Map<String, Profile> ps = profiles.authenticationDatabase;
 			for (String name : ps.keySet()) {
-				OuterProfile v = ps.get(name);
-				Profile p = v.authentication;
+				Profile p = ps.get(name);
 				if (p == null) continue;
 				if (p.displayName == null || p.displayName.length() == 0) p.displayName = p.username;
 				this.profiles.add(p);
 			}
 		} catch (FileNotFoundException e) {
 			return;
-		} catch(NullPointerException e) {
+		} catch (NullPointerException e) {
 			return;
 		}
 
@@ -89,14 +86,10 @@ public class YggdrasilImpersonator {
 	}
 
 	public class ProfilesJSON {
-		public Map<String, OuterProfile> profiles;
+		public Map<String, Profile> profiles;
 		public String selectedProfile;
 		public String clientToken;
-
-		public class OuterProfile {
-			public String name;
-			public Profile authentication;
-		}
+		public Map<String, Profile> authenticationDatabase;
 	}
 
 	public class Profile {
@@ -104,6 +97,9 @@ public class YggdrasilImpersonator {
 		public String accessToken;
 		public String uuid;
 		public String displayName;
+
+		public String name;
+		public String playerUUID;
 
 		public Profile(String u, String t, String id, String d) {
 			username = u;
