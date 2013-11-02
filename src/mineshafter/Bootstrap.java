@@ -36,7 +36,7 @@ public class Bootstrap extends JFrame {
 
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 4;
+	private static int mineshafterBootstrapVersion = 5;
 
 	private final File workDir;
 	private final File launcherJar;
@@ -128,6 +128,7 @@ public class Bootstrap extends JFrame {
 				else if (n.equals("net/minecraft/launcher/Http.class")) dataSource = Resources.load("resources/Http.class");
 				else if (n.equals("net/minecraft/launcher/updater/download/Downloadable.class")) dataSource = Resources.load("resources/Downloadable.class");
 				else if (n.equals("net/minecraft/hopper/Util.class")) dataSource = Resources.load("resources/Util.class");
+				else if (n.equals("com/mojang/authlib/HttpAuthenticationService.class")) dataSource = Resources.load("resources/HttpAuthenticationService.class");
 				else dataSource = inStream;
 				Streams.pipeStreams(dataSource, outStream);
 				outStream.flush();
