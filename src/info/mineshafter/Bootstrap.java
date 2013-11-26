@@ -125,8 +125,6 @@ public class Bootstrap extends JFrame {
 
 				outStream.putNextEntry(entry);
 				if (n.equals("META-INF/MANIFEST.MF")) dataSource = new ByteArrayInputStream("Manifest-Version: 1.0\n".getBytes());
-				//else if (n.equals("net/minecraft/launcher/Http.class")) dataSource = Resources.load("resources/Http.class");
-				//else if (n.equals("net/minecraft/hopper/Util.class")) dataSource = Resources.load("resources/Util.class");
 				else if (n.equals("com/mojang/authlib/HttpAuthenticationService.class")) dataSource = Resources.load("resources/HttpAuthenticationService.class");
 				else dataSource = inStream;
 				Streams.pipeStreams(dataSource, outStream);
