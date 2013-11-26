@@ -1,4 +1,4 @@
-package mineshafter.proxy;
+package info.mineshafter.proxy;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 import com.google.gson.Gson;
 
-import mineshafter.Util;
+import info.mineshafter.Util;
 
 public class YggdrasilProxyHandler implements HttpProxyHandler, SocksProxyHandler {
 	public static String authServer = "mineshafter.info";

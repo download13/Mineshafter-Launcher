@@ -1,4 +1,4 @@
-package mineshafter.proxy;
+package info.mineshafter.proxy;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

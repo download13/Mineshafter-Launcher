@@ -1,4 +1,4 @@
-package mineshafter;
+package info.mineshafter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +12,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import mineshafter.util.SimpleRequest;
+import info.mineshafter.util.SimpleRequest;
 
 public class Util {
 	public static final String APPLICATION_NAME = "minecraft";

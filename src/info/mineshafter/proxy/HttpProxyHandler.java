@@ -1,4 +1,4 @@
-package mineshafter.proxy;
+package info.mineshafter.proxy;
 
 import java.io.InputStream;
 import java.io.OutputStream;

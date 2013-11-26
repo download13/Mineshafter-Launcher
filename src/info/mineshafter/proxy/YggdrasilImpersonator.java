@@ -1,4 +1,4 @@
-package mineshafter.proxy;
+package info.mineshafter.proxy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import mineshafter.Util;
+import info.mineshafter.Util;
 import com.google.gson.Gson;
 
 public class YggdrasilImpersonator {

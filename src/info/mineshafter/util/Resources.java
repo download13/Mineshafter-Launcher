@@ -1,4 +1,4 @@
-package mineshafter.util;
+package info.mineshafter.util;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

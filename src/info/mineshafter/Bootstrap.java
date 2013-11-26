@@ -1,4 +1,4 @@
-package mineshafter;
+package info.mineshafter;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -24,11 +24,11 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 
-import mineshafter.proxy.ModularProxy;
-import mineshafter.proxy.SocksProxyConnection;
-import mineshafter.proxy.YggdrasilProxyHandler;
-import mineshafter.util.Resources;
-import mineshafter.util.Streams;
+import info.mineshafter.proxy.ModularProxy;
+import info.mineshafter.proxy.SocksProxyConnection;
+import info.mineshafter.proxy.YggdrasilProxyHandler;
+import info.mineshafter.util.Resources;
+import info.mineshafter.util.Streams;
 import SevenZip.Compression.LZMA.*;
 
 public class Bootstrap extends JFrame {
@@ -125,9 +125,8 @@ public class Bootstrap extends JFrame {
 
 				outStream.putNextEntry(entry);
 				if (n.equals("META-INF/MANIFEST.MF")) dataSource = new ByteArrayInputStream("Manifest-Version: 1.0\n".getBytes());
-				else if (n.equals("net/minecraft/launcher/Http.class")) dataSource = Resources.load("resources/Http.class");
-				else if (n.equals("net/minecraft/launcher/updater/download/Downloadable.class")) dataSource = Resources.load("resources/Downloadable.class");
-				else if (n.equals("net/minecraft/hopper/Util.class")) dataSource = Resources.load("resources/Util.class");
+				//else if (n.equals("net/minecraft/launcher/Http.class")) dataSource = Resources.load("resources/Http.class");
+				//else if (n.equals("net/minecraft/hopper/Util.class")) dataSource = Resources.load("resources/Util.class");
 				else if (n.equals("com/mojang/authlib/HttpAuthenticationService.class")) dataSource = Resources.load("resources/HttpAuthenticationService.class");
 				else dataSource = inStream;
 				Streams.pipeStreams(dataSource, outStream);
