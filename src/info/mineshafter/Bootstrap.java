@@ -36,7 +36,7 @@ public class Bootstrap extends JFrame {
 
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 5;
+	private static int mineshafterBootstrapVersion = 6;
 
 	private final File workDir;
 	private final File launcherJar;
