@@ -1,3 +1,8 @@
+This file is part of MineshafterMC, licensed under the Apache License 2.0 (Apache 2.0).
+
+Copyright (c) MineshafterMC <http://mineshafter.info>
+Copyright (c) Contributers
+
 package info.mineshafter;
 
 import java.io.BufferedInputStream;
