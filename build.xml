@@ -1,0 +1,55 @@
+<project name="Mineshafter-Launcher" basedir="." default="build">
+	<!-- variables setup -->
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.7"/>
+    <property name="source" value="1.7"/>
+	
+	<!-- Path Setup -->
+    <path id=".classpath">
+        <pathelement location="bin"/>
+    </path>
+	
+	<!-- init -->
+    <target name="init">
+        <mkdir dir="bin"/>
+    	<mkdir dir="dist"/>
+    </target>
+	
+	<!-- clean -->
+    <target name="clean">
+        <delete dir="bin"/>
+    	<delete dir="dist"/>
+    </target>
+	
+	<!-- default build -->
+    <target depends="init" name="build">
+    	<echo message="Compile"/>
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid=".classpath"/>
+        </javac>
+    </target>
+	
+	<!-- Make Jars -->
+	<target depends="build" name="compress">
+		<echo message="Compress"/>
+		<echo message="Copy Util.class into bin" />
+		<!-- Copy Util.class -->
+		<copy file="Util.class" todir="bin" />
+		<!-- Mine Client -->
+		<echo message="Build MineClient"/>
+		<jar destfile="dist/Mineshafter-Launcher.jar" basedir="bin">
+			<manifest>
+				<attribute name="Manifest-Version" value="1.0" />
+				<attribute name="Class-Path" value="." />
+				<attribute name="Main-Class" value="info.mineshafter.Bootstrap.java" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- There really isn't an automated way to test this -->
+	<target name="test">
+	</target>
+</project>
