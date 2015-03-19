@@ -6,7 +6,7 @@
     <property name="source" value="1.7"/>
 	
 	<!-- Path Setup -->
-    <path id="Mineshafter-Launcher.classpath">
+    <path id=".classpath">
         <pathelement location="bin"/>
     </path>
 	
@@ -28,7 +28,7 @@
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
             <src path="src"/>
-            <classpath refid="Mineshafter-Launcher.classpath"/>
+            <classpath refid=".classpath"/>
         </javac>
     </target>
 	
