@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
 <jardesc>
-    <jar path="C:/Users/download/Desktop/Games/Minecraft/Mineshafter-launcher.jar"/>
+    <jar path="C:/Users/download/Desktop/Mineshafter-launcher.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/Mineshafter Launcher/Build.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>

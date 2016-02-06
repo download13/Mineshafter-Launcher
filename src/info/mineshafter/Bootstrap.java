@@ -1,34 +1,31 @@
 package info.mineshafter;
 
+import info.mineshafter.hacks.HandlerFactory;
+import info.mineshafter.mod.JarPatcher;
+import info.mineshafter.util.Resources;
+import info.mineshafter.util.Streams;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Constructor;
-import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Pack200;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 
-import info.mineshafter.proxy.ModularProxy;
-import info.mineshafter.proxy.SocksProxyConnection;
-import info.mineshafter.proxy.YggdrasilProxyHandler;
-import info.mineshafter.util.Resources;
-import info.mineshafter.util.Streams;
 import SevenZip.Compression.LZMA.*;
 
 public class Bootstrap extends JFrame {
@@ -36,21 +33,23 @@ public class Bootstrap extends JFrame {
 
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 6;
+	private static int mineshafterBootstrapVersion = 8;
 
 	private final File workDir;
 	private final File launcherJar;
 	private final File packedLauncherJar;
 	private final File packedLauncherJarNew;
 	private final File patchedLauncherJar;
+	private final File starterJar;
 
 	public Bootstrap() {
 		super("Minecraft Launcher");
-		this.workDir = Util.getWorkingDirectory();
-		this.launcherJar = new File(workDir, "launcher.jar");
-		this.packedLauncherJar = new File(workDir, "launcher.pack.lzma");
-		this.packedLauncherJarNew = new File(workDir, "launcher.pack.lzma.new");
-		this.patchedLauncherJar = new File(workDir, "launcher_mcpatched.jar");
+		workDir = Util.getWorkingDirectory();
+		launcherJar = new File(workDir, "launcher.jar");
+		packedLauncherJar = new File(workDir, "launcher.pack.lzma");
+		packedLauncherJarNew = new File(workDir, "launcher.pack.lzma.new");
+		patchedLauncherJar = new File(workDir, "launcher_mcpatched.jar");
+		starterJar = new File(workDir, "ms-starter.jar");
 	}
 
 	public void run() {
@@ -58,25 +57,26 @@ public class Bootstrap extends JFrame {
 		if (packedLauncherJarNew.isFile()) renameNew();
 
 		String md5 = null;
-		if (this.packedLauncherJar.exists()) md5 = Util.getMd5(this.packedLauncherJar);
-		if (!Util.grabLauncher(md5, this.packedLauncherJarNew)) System.out.println("New launcher not downloaded");
+		if (packedLauncherJar.exists()) md5 = Util.getMd5(packedLauncherJar);
+		if (!Util.grabLauncher(md5, packedLauncherJarNew)) System.out.println("New launcher not downloaded");
 		renameNew();
 		unpack();
 		patchLauncher();
+		buildGameStarter();
 		startLauncher();
 	}
 
 	public void renameNew() {
-		if (this.packedLauncherJarNew.isFile()) {
-			this.packedLauncherJar.delete();
-			this.packedLauncherJarNew.renameTo(this.packedLauncherJar);
+		if (packedLauncherJarNew.isFile()) {
+			packedLauncherJar.delete();
+			packedLauncherJarNew.renameTo(packedLauncherJar);
 		}
 	}
 
 	public void unpack() {
 		if (!this.packedLauncherJar.exists()) return;
 
-		String path = this.packedLauncherJar.getAbsolutePath();
+		String path = packedLauncherJar.getAbsolutePath();
 		File unpacked = new File(path.substring(0, path.lastIndexOf('.')));
 
 		try {
@@ -99,7 +99,7 @@ public class Bootstrap extends JFrame {
 			outStream.flush();
 			outStream.close();
 
-			JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(this.launcherJar));
+			JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(launcherJar));
 			Pack200.newUnpacker().unpack(unpacked, jarOut);
 			jarOut.close();
 			unpacked.delete();
@@ -110,56 +110,70 @@ public class Bootstrap extends JFrame {
 	}
 
 	public void patchLauncher() {
-		if (!this.launcherJar.exists()) return;
-		if (this.patchedLauncherJar.exists()) this.patchedLauncherJar.delete();
+		if (!launcherJar.exists()) return;
+		if (patchedLauncherJar.exists()) patchedLauncherJar.delete();
 
-		try {
-			ZipInputStream inStream = new ZipInputStream(new FileInputStream(this.launcherJar));
-			ZipOutputStream outStream = new ZipOutputStream(new FileOutputStream(this.patchedLauncherJar));
-			ZipEntry entry;
-			String n;
-			InputStream dataSource;
-			while ((entry = inStream.getNextEntry()) != null) {
-				n = entry.getName();
-				if (n.startsWith("META-INF/") && (n.endsWith(".DSA") || n.endsWith(".RSA") || n.endsWith(".SF"))) continue;
-
-				outStream.putNextEntry(entry);
-				if (n.equals("META-INF/MANIFEST.MF")) dataSource = new ByteArrayInputStream("Manifest-Version: 1.0\n".getBytes());
-				else if (n.equals("com/mojang/authlib/HttpAuthenticationService.class")) dataSource = Resources.load("resources/HttpAuthenticationService.class");
-				else dataSource = inStream;
-				Streams.pipeStreams(dataSource, outStream);
-				outStream.flush();
+		JarPatcher patcher = new JarPatcher(launcherJar);
+		for(String name : patcher.getEntries()) { // Get rid of all that metadata
+			if(name.startsWith("META-INF/")) {
+				patcher.removeEntry(name);
 			}
-			inStream.close();
-			outStream.close();
-		} catch (Exception e) {
-			System.out.println("Error while patching launcher:");
-			e.printStackTrace();
+		}
+		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner.class", Resources.loadByteArray("resources/MinecraftGameRunner.class"));
+		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner$1.class", Resources.loadByteArray("resources/MinecraftGameRunner$1.class"));
+		patcher.setEntry("yggdrasil_session_pubkey.der", Resources.loadByteArray("resources/ms_pubkey.der"));
+
+		patcher.setEntry("info/mineshafter/mod/JarPatcher.class", Resources.loadByteArray("info/mineshafter/mod/JarPatcher.class"));
+		patcher.setEntry("info/mineshafter/util/Streams.class", Resources.loadByteArray("info/mineshafter/util/Streams.class"));
+		patcher.setEntry("info/mineshafter/util/Resources.class", Resources.loadByteArray("info/mineshafter/util/Resources.class"));
+
+		patcher.setEntry("resources/Property.class", Resources.loadByteArray("resources/Property.class"));
+
+		patcher.write(patchedLauncherJar);
+	}
+
+	public void buildGameStarter() {
+		File thisFile = new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		InputStream in = null;
+		OutputStream out = null;
+		try {
+			in = new FileInputStream(thisFile);
+
+			if (starterJar.exists()) { // Only delete once we know we can make a new one
+				starterJar.delete();
+			}
+
+			out = new FileOutputStream(starterJar);
+
+			Streams.pipeStreams(in, out);
+
+			Streams.close(in);
+			Streams.close(out);
+		} catch (FileNotFoundException e) {
+			return;
 		}
 	}
 
 	public void startLauncher() {
-		ModularProxy proxy = new ModularProxy(SocksProxyConnection.class, (Object) new YggdrasilProxyHandler());
-		proxy.start();
-		int proxyPort = proxy.getListeningPort();
-
 		System.setErr(System.out);
 		System.setProperty("java.net.preferIPv4Stack", "true");
-		Proxy proxyInfo = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", proxyPort));
 
-		try {
-			Class<?> launcher = new URLClassLoader(new URL[] { this.patchedLauncherJar.toURI().toURL() }).loadClass("net.minecraft.launcher.Launcher");
-			Constructor<?> ctor = launcher.getConstructor(new Class[] { JFrame.class, File.class, Proxy.class, PasswordAuthentication.class, java.lang.String[].class, Integer.class });
-			ctor.newInstance(new Object[] { this, this.workDir, proxyInfo, null, new String[] {}, bootstrapVersion });
-		} catch (Exception e) {
-			System.out.println("Error while starting launcher:");
-			e.printStackTrace();
-		}
+		URL.setURLStreamHandlerFactory(new HandlerFactory());
 
 		setSize(854, 480);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setVisible(true);
+
+		try {
+			@SuppressWarnings("resource")
+			Class<?> launcher = new URLClassLoader(new URL[] { patchedLauncherJar.toURI().toURL() }).loadClass("net.minecraft.launcher.Launcher");
+			Constructor<?> ctor = launcher.getConstructor(new Class[] { JFrame.class, File.class, Proxy.class, PasswordAuthentication.class, java.lang.String[].class, Integer.class });
+			ctor.newInstance(new Object[] { this, this.workDir, Proxy.NO_PROXY, null, new String[] {}, bootstrapVersion });
+		} catch (Exception e) {
+			System.out.println("Error while starting launcher:");
+			e.printStackTrace();
+		}
 	}
 
 	public static void main(String[] args) {

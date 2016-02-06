@@ -1,6 +1,7 @@
 package info.mineshafter.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -24,6 +25,22 @@ public class Resources {
 			}
 			reader.close();
 			return builder.toString();
+		} catch(Exception e) {
+			System.out.println("load resources:");
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public static byte[] loadByteArray(String filename) {
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			InputStream in = load(filename);
+			
+			Streams.pipeStreams(in, out);
+			
+			return out.toByteArray();
 		} catch(Exception e) {
 			System.out.println("load resources:");
 			e.printStackTrace();
