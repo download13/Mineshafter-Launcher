@@ -35,12 +35,12 @@ public class YggdrasilImpersonator implements Handler {
 		String r = "";
 
 		JsonObject yggreq = JsonObject.readFrom(new String(req.body));
-		
+
 		String path = req.path.toLowerCase();
 
-		if (path == "/authenticate") {
+		if (path.equals("/authenticate")) {
 			r = authenticate(yggreq);
-		} else if (path == "/refresh") {
+		} else if (path.equals("/refresh")) {
 			r = refresh(yggreq);
 		} else {
 			r = ""; // Send a blank response
@@ -72,6 +72,7 @@ public class YggdrasilImpersonator implements Handler {
 		response.set("accessToken", accessToken);
 		response.set("selectedProfile", user);
 		response.set("availableProfiles", new JsonArray().add(user));
+		System.out.println(response.toString());
 
 		return response.toString();
 	}
@@ -86,7 +87,7 @@ public class YggdrasilImpersonator implements Handler {
 
 		String newAccessToken = Util.getMd5(accessToken + Long.toString(System.currentTimeMillis()));
 		p.setAccessToken(newAccessToken);
-		
+
 		JsonObject user = new JsonObject();
 		user.set("id", p.getId());
 		user.set("name", p.getName());
