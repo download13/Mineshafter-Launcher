@@ -33,7 +33,7 @@ public class Bootstrap extends JFrame {
 
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 8;
+	private static int mineshafterBootstrapVersion = 9;
 
 	private final File workDir;
 	private final File launcherJar;
@@ -150,6 +150,7 @@ public class Bootstrap extends JFrame {
 			Streams.close(in);
 			Streams.close(out);
 		} catch (FileNotFoundException e) {
+			System.out.println("Can't create ms-starter.jar");
 			return;
 		}
 	}
