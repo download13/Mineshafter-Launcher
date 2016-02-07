@@ -17,7 +17,7 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
 public final class YggdrasilProfileAuthority implements ProfileAuthority {
-	private static final String SEARCH_URL = "rawhttps://api.mojang.com/profiles/page/1";
+	private static final String SEARCH_URL = "rawhttps://api.mojang.com/profiles/minecraft";
 
 	private static final String GET_URL = "rawhttps://sessionserver.mojang.com/session/minecraft/profile/";
 
@@ -108,12 +108,8 @@ public final class YggdrasilProfileAuthority implements ProfileAuthority {
 			e1.printStackTrace();
 		}
 
-		JsonObject lookup = new JsonObject();
-		lookup.set("name", name);
-		lookup.set("agent", "Minecraft");
-
 		JsonArray request = new JsonArray();
-		request.add(lookup);
+		request.add(name);
 
 		byte[] requestBody = request.toString().getBytes();
 
@@ -135,8 +131,7 @@ public final class YggdrasilProfileAuthority implements ProfileAuthority {
 
 			System.out.println("YggdrasilProfileClient.searchProfile(" + name + ") = " + responseJSON);
 
-			JsonObject response = JsonObject.readFrom(responseJSON);
-			JsonArray profiles = response.get("profiles").asArray();
+			JsonArray profiles = JsonArray.readFrom(responseJSON);
 			if (profiles.size() == 0) { return null; }
 
 			JsonObject profile = profiles.get(0).asObject();
