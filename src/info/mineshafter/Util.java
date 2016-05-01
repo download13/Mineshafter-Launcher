@@ -1,8 +1,11 @@
 package info.mineshafter;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
@@ -11,7 +14,10 @@ import java.net.URL;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Pack200;
 
+import SevenZip.Compression.LZMA.Decoder;
 import info.mineshafter.util.SimpleRequest;
 
 public class Util {
@@ -74,7 +80,10 @@ public class Util {
 			connection.setReadTimeout(10000);
 
 			int code = connection.getResponseCode();
-			if (code / 100 == 2) {
+			if (code == 304) {
+				System.out.println("Launcher already exists");
+				return false;
+			} else if (code / 100 == 2) {
 				InputStream inputStream = connection.getInputStream();
 				FileOutputStream outputStream = new FileOutputStream(file);
 
@@ -91,6 +100,7 @@ public class Util {
 				}
 				return true;
 			} else if (tries == 0) {
+				System.out.println("Failed to download launcher with error: " + code);
 				return false;
 			} else {
 				return Util.grabLauncher(md5, file, tries - 1);
@@ -143,6 +153,46 @@ public class Util {
 			System.out.println("Error while checking version:");
 			e.printStackTrace();
 			return 0;
+		}
+	}
+	
+
+	public static void unpackLZMA(File packedFile, File unpackedFile) {
+		try {
+			BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(packedFile));
+			BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(unpackedFile));
+
+			byte[] properties = new byte[5];
+			inStream.read(properties, 0, 5);
+			Decoder decoder = new Decoder();
+			decoder.SetDecoderProperties(properties);
+			long outSize = 0;
+			for (int i = 0; i < 8; i++) {
+				int v = inStream.read();
+				outSize |= ((long) v) << (8 * i);
+			}
+
+			decoder.Code(inStream, outStream, outSize);
+
+			inStream.close();
+			outStream.flush();
+			outStream.close();
+		} catch (IOException e) {
+			System.out.println("Exception while unpacking:");
+			e.printStackTrace();
+		}
+	}
+	
+	public static void unpack200(File packedFile, File unpackedFile) {
+		try {
+			BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(packedFile));
+			JarOutputStream outStream = new JarOutputStream(new FileOutputStream(unpackedFile));
+
+			Pack200.newUnpacker().unpack(inStream, outStream);
+			outStream.close();
+		} catch (IOException e) {
+			System.out.println("Exception while unpacking:");
+			e.printStackTrace();
 		}
 	}
 }
