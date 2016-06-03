@@ -61,7 +61,7 @@ public class Util {
 	}
 
 	public static boolean grabLauncher(String md5, File file) {
-		return Util.grabLauncher(md5, file, 4);
+		return Util.grabLauncher(md5, file, 3);
 	}
 
 	public static boolean grabLauncher(String md5, File file, int tries) {
