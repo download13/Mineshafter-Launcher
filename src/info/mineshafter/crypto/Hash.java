@@ -24,6 +24,10 @@ public class Hash {
 		return hash("SHA-1", input);
 	}
 
+	public static String sha1(byte[] input) {
+		return hash("SHA-1", input);
+	}
+
 	private static String hash(String algorithm, InputStream input) {
 		DigestInputStream stream;
 		try {
