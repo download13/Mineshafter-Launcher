@@ -1,6 +1,6 @@
 package info.mineshafter;
 
-import info.mineshafter.hacks.HandlerFactory;
+import info.mineshafter.hacks.URLHandlerFactory;
 import info.mineshafter.mod.JarPatcher;
 import info.mineshafter.util.Resources;
 import info.mineshafter.util.Streams;
@@ -130,7 +130,7 @@ public class Bootstrap extends JFrame {
 		System.setErr(System.out);
 		System.setProperty("java.net.preferIPv4Stack", "true");
 
-		URL.setURLStreamHandlerFactory(new HandlerFactory());
+		URL.setURLStreamHandlerFactory(new URLHandlerFactory());
 
 		try {
 			@SuppressWarnings("resource")

@@ -1,6 +1,6 @@
 package info.mineshafter;
 
-import info.mineshafter.hacks.HandlerFactory;
+import info.mineshafter.hacks.URLHandlerFactory;
 
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -11,7 +11,7 @@ public class GameStarter {
 		System.out.println("GameStarter running! " + className);
 
 		// Activate the hooks
-		URL.setURLStreamHandlerFactory(new HandlerFactory());
+		URL.setURLStreamHandlerFactory(new URLHandlerFactory());
 
 		String[] passedArgs = new String[args.length - 1];
 		for (int i = 1; i < args.length; i++) {
