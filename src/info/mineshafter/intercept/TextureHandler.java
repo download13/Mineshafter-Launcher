@@ -63,14 +63,13 @@ public class TextureHandler implements Handler {
 			} else if (type == '1') { // Cape
 				skinUrl = capeLookup.get(id);
 			}
+
 			//System.out.println("TextureHandler.handle type: " + type);
 
 			HttpURLConnection conn = (HttpURLConnection) skinUrl.openConnection();
 			byte[] data = Streams.toByteArray(conn.getInputStream());
 
-			Response r = new Response(data);
-
-			return r;
+			return new Response(data);
 		} catch (IOException e) {
 			e.printStackTrace();
 
