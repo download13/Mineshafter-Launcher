@@ -8,6 +8,11 @@ public class Response extends Message {
 		body = b;
 	}
 
+	public Response(String b) {
+		status = 200;
+		body = b.getBytes();
+	}
+
 	public Response(int stat, String b) {
 		status = stat;
 		body = b.getBytes();
