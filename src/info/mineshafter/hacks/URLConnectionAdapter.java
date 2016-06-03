@@ -29,7 +29,7 @@ public class URLConnectionAdapter extends HttpURLConnection {
 		req = new Request(url);
 
 		bodyStream = new ByteArrayOutputStream();
-		
+
 		handler = h;
 	}
 

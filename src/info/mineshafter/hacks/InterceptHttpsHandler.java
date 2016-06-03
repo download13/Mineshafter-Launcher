@@ -12,12 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public class InterceptHttpsHandler extends sun.net.www.protocol.https.Handler {
-	private static Handler[] handlers = new Handler[] {
-		YggdrasilImpersonator.getInstance(),
-		ProfileHandler.getInstance(),
-		TextureHandler.getInstance(),
-		MetadataHandler.getInstance(),
-	};
+	private static Handler[] handlers = new Handler[] { YggdrasilImpersonator.getInstance(), ProfileHandler.getInstance(), TextureHandler.getInstance(), MetadataHandler.getInstance(), };
 
 	@Override
 	protected URLConnection openConnection(URL u) throws IOException {
@@ -34,10 +29,10 @@ public class InterceptHttpsHandler extends sun.net.www.protocol.https.Handler {
 				break;
 			}
 		}
-		
+
 		System.out.println("Should handle? " + url.toString() + " " + (handler != null));
-		
-		if(handler != null) {
+
+		if (handler != null) {
 			return new URLConnectionAdapter(url, handler);
 		} else {
 			return super.openConnection(url, p);
