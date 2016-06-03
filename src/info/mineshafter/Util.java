@@ -1,6 +1,7 @@
 package info.mineshafter;
 
 import info.mineshafter.crypto.Hash;
+import info.mineshafter.http.client.HttpClient;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -130,7 +131,7 @@ public class Util {
 
 	public static float getCurrentBootstrapVersion() {
 		try {
-			byte[] verdata = SimpleRequest.get(new URL("http://mineshafter.info/bootver"));
+			byte[] verdata = HttpClient.get(new URL("http://mineshafter.info/bootver"));
 			String verstring;
 			if (verdata == null) verstring = "0";
 			else verstring = new String(verdata);
