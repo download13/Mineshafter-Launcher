@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,11 +21,23 @@ public class JarPatcher {
 	private Map<String, byte[]> entries;
 	
 	public JarPatcher(File jarFile) {
+		try {
+			init(new FileInputStream(jarFile));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public JarPatcher(InputStream jarStream) {
+		init(jarStream);
+	}
+	
+	private void init(InputStream jarStream) {
 		entries = new HashMap<String, byte[]>();
 
 		try {
 			ZipEntry entry;
-			ZipInputStream jarIn = new ZipInputStream(new FileInputStream(jarFile));
+			ZipInputStream jarIn = new ZipInputStream(jarStream);
 
 			while ((entry = jarIn.getNextEntry()) != null) {
 				String name = entry.getName();
