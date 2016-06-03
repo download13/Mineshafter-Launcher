@@ -1,8 +1,8 @@
 package info.mineshafter.intercept;
 
 import info.mineshafter.Util;
+import info.mineshafter.datasources.AutomaticProfileAuthority;
 import info.mineshafter.models.Profile;
-import info.mineshafter.storage.Profiles;
 
 import java.net.URL;
 
@@ -13,7 +13,7 @@ import com.eclipsesource.json.JsonValue;
 public class YggdrasilImpersonator implements Handler {
 	private static String HOST = "authserver.mojang.com";
 
-	private static Profiles profiles = Profiles.getInstance();
+	private static AutomaticProfileAuthority profiles = AutomaticProfileAuthority.getInstance();
 
 	private static YggdrasilImpersonator instance;
 
@@ -61,7 +61,7 @@ public class YggdrasilImpersonator implements Handler {
 
 		String accessToken = Util.getMd5(username + password + Long.toString(System.currentTimeMillis()));
 
-		Profile p = profiles.getProfileByName(username);
+		Profile p = profiles.searchProfile(username);
 
 		JsonObject user = new JsonObject();
 		user.set("id", p.getId());

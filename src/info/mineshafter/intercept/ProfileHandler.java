@@ -1,7 +1,7 @@
 package info.mineshafter.intercept;
 
+import info.mineshafter.datasources.AutomaticProfileAuthority;
 import info.mineshafter.models.Profile;
-import info.mineshafter.storage.Profiles;
 
 import java.net.URL;
 import java.util.regex.Matcher;
@@ -20,7 +20,7 @@ public class ProfileHandler implements Handler {
 	private static Pattern SEARCH_PATH = Pattern.compile("/profiles/page/(.+?)");
 	private static Pattern GET_PATH = Pattern.compile("/session/minecraft/profile/([0-9a-fA-F]+?)");
 
-	private static Profiles profiles = Profiles.getInstance();
+	private static AutomaticProfileAuthority profiles = AutomaticProfileAuthority.getInstance();
 
 	private static ProfileHandler instance;
 
@@ -71,7 +71,7 @@ public class ProfileHandler implements Handler {
 	private String getProfile(String id) {
 		System.out.println("ProfileHandler.getProfile " + id);
 
-		Profile p = profiles.byId(id);
+		Profile p = profiles.getProfile(id);
 
 		JsonObject textures = new JsonObject();
 		textures.set("SKIN", new JsonObject().add("url", p.getSkin()));
@@ -113,7 +113,7 @@ public class ProfileHandler implements Handler {
 		JsonArray profilesJson = new JsonArray();
 
 		for (JsonValue r : requests) {
-			Profile p = profiles.getProfileByName(r.asObject().get("name").asString());
+			Profile p = profiles.searchProfile(r.asObject().get("name").asString());
 
 			JsonObject profileResult = new JsonObject();
 			profileResult.set("id", p.getId());
