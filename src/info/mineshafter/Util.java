@@ -1,6 +1,6 @@
 package info.mineshafter;
 
-import info.mineshafter.util.SimpleRequest;
+import info.mineshafter.crypto.Hash;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -15,7 +15,6 @@ import java.net.Proxy;
 import java.net.URL;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Pack200;
 
@@ -126,13 +125,7 @@ public class Util {
 	}
 
 	public static String getMd5(String v) {
-		try {
-			MessageDigest hash = MessageDigest.getInstance("MD5");
-			hash.update(v.getBytes());
-			String r = String.format("%1$032x", new Object[] { new BigInteger(1, hash.digest()) });
-			return r;
-		} catch (NoSuchAlgorithmException e) {}
-		return null;
+		return Hash.md5(v);
 	}
 
 	public static float getCurrentBootstrapVersion() {
