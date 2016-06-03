@@ -1,5 +1,7 @@
 package info.mineshafter;
 
+import info.mineshafter.util.SimpleRequest;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -18,7 +20,6 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Pack200;
 
 import SevenZip.Compression.LZMA.Decoder;
-import info.mineshafter.util.SimpleRequest;
 
 public class Util {
 	public static final String APPLICATION_NAME = "minecraft";
@@ -155,7 +156,6 @@ public class Util {
 			return 0;
 		}
 	}
-	
 
 	public static void unpackLZMA(File packedFile, File unpackedFile) {
 		try {
@@ -182,7 +182,7 @@ public class Util {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void unpack200(File packedFile, File unpackedFile) {
 		try {
 			BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(packedFile));
