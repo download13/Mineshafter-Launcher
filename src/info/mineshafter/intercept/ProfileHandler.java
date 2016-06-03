@@ -1,6 +1,5 @@
 package info.mineshafter.intercept;
 
-import info.mineshafter.datasources.Signer;
 import info.mineshafter.models.Profile;
 import info.mineshafter.storage.Profiles;
 
@@ -8,11 +7,11 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import biz.source_code.base64Coder.Base64Coder;
+
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
-
-import biz.source_code.base64Coder.Base64Coder;
 
 public class ProfileHandler implements Handler {
 	private static String SEARCH_HOST = "api.mojang.com";
@@ -90,13 +89,10 @@ public class ProfileHandler implements Handler {
 
 		textureJSON = Base64Coder.encodeString(textureJSON); // Must be base64 encoded
 
-		byte[] signatureBytes = Signer.getInstance().sign(textureJSON.getBytes());
-		String signature = new String(Base64Coder.encode(signatureBytes));
-
 		JsonObject profileProperty = new JsonObject();
 		profileProperty.set("name", "textures");
 		profileProperty.set("value", textureJSON);
-		profileProperty.set("signature", signature);
+		profileProperty.set("signature", "");
 
 		JsonObject profileResponse = new JsonObject();
 		profileResponse.set("id", p.getId());

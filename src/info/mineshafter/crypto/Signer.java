@@ -1,4 +1,4 @@
-package info.mineshafter.datasources;
+package info.mineshafter.crypto;
 
 import info.mineshafter.util.Resources;
 
