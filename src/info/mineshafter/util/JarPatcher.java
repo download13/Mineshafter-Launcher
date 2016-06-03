@@ -1,5 +1,7 @@
 package info.mineshafter.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,7 +19,7 @@ import java.util.zip.ZipOutputStream;
 
 public class JarPatcher {
 	private Map<String, byte[]> entries;
-	
+
 	public JarPatcher(File jarFile) {
 		try {
 			init(new FileInputStream(jarFile));
@@ -25,11 +27,15 @@ public class JarPatcher {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public JarPatcher(InputStream jarStream) {
 		init(jarStream);
 	}
-	
+
+	public JarPatcher(byte[] jarData) {
+		init(new ByteArrayInputStream(jarData));
+	}
+
 	private void init(InputStream jarStream) {
 		entries = new HashMap<String, byte[]>();
 
@@ -42,7 +48,7 @@ public class JarPatcher {
 
 				entries.put(name, Streams.toByteArray(jarIn));
 			}
-			
+
 			jarIn.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -73,7 +79,7 @@ public class JarPatcher {
 		ZipOutputStream out = new ZipOutputStream(destination);
 
 		try {
-			for(String name : entries.keySet()) {
+			for (String name : entries.keySet()) {
 				ZipEntry entry = new ZipEntry(name);
 				byte[] blob = entries.get(name);
 
@@ -87,5 +93,11 @@ public class JarPatcher {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public byte[] write() {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		write(out);
+		return out.toByteArray();
 	}
 }
