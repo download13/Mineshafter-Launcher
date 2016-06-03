@@ -32,14 +32,10 @@ public class TextureHandler implements Handler {
 	private TextureHandler() {}
 
 	public boolean canHandle(URL req) {
-		if(!textureHost.equalsIgnoreCase(req.getHost())) {
-			return false;
-		}
+		if (!textureHost.equalsIgnoreCase(req.getHost())) { return false; }
 
 		Matcher m = textureUrl.matcher(req.getPath());
-		if(!m.matches()) {
-			return false;
-		}
+		if (!m.matches()) { return false; }
 
 		String hash = m.group(1);
 		char type = hash.charAt(60);
