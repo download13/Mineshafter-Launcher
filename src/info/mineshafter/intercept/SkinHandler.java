@@ -30,7 +30,7 @@ public class SkinHandler implements Handler {
 		return instance;
 	}
 
-	public boolean handle(URL url) {
+	public boolean canHandle(URL url) {
 		return url.getHost().equalsIgnoreCase(HOST);
 	}
 

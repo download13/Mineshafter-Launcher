@@ -35,7 +35,7 @@ public class ProfileHandler implements Handler {
 		return instance;
 	}
 
-	public boolean handle(URL url) {
+	public boolean canHandle(URL url) {
 		return (url.getHost().equalsIgnoreCase(SEARCH_HOST) || url.getHost().equalsIgnoreCase(GET_HOST));
 	}
 
@@ -70,7 +70,7 @@ public class ProfileHandler implements Handler {
 	}
 
 	private String getProfile(String id) {
-		System.out.println("ProfileHandler.getProfile(" + id + ")");
+		System.out.println("ProfileHandler.getProfile " + id);
 
 		Profile p = profiles.byId(id);
 
@@ -97,7 +97,7 @@ public class ProfileHandler implements Handler {
 		profileProperty.set("name", "textures");
 		profileProperty.set("value", textureJSON);
 		profileProperty.set("signature", signature);
-		
+
 		JsonObject profileResponse = new JsonObject();
 		profileResponse.set("id", p.getId());
 		profileResponse.set("name", p.getName());
@@ -125,7 +125,7 @@ public class ProfileHandler implements Handler {
 
 			profilesJson.add(profileResult);
 		}
-		
+
 		JsonObject searchResponse = new JsonObject();
 		searchResponse.set("profiles", profilesJson);
 		searchResponse.set("size", profilesJson.size());

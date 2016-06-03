@@ -31,7 +31,7 @@ public class TextureHandler implements Handler {
 
 	private TextureHandler() {}
 
-	public boolean handle(URL req) {
+	public boolean canHandle(URL req) {
 		if(!textureHost.equalsIgnoreCase(req.getHost())) {
 			return false;
 		}

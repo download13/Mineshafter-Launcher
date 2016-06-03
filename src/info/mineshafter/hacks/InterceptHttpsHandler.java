@@ -1,6 +1,7 @@
 package info.mineshafter.hacks;
 
 import info.mineshafter.intercept.Handler;
+import info.mineshafter.intercept.MetadataHandler;
 import info.mineshafter.intercept.ProfileHandler;
 import info.mineshafter.intercept.SkinHandler;
 import info.mineshafter.intercept.TextureHandler;
@@ -17,6 +18,7 @@ public class InterceptHttpsHandler extends sun.net.www.protocol.https.Handler {
 		YggdrasilImpersonator.getInstance(),
 		ProfileHandler.getInstance(),
 		TextureHandler.getInstance(),
+		MetadataHandler.getInstance(),
 	};
 
 	@Override
@@ -29,7 +31,7 @@ public class InterceptHttpsHandler extends sun.net.www.protocol.https.Handler {
 		Handler handler = null;
 
 		for (Handler h : handlers) {
-			if (h.handle(url)) {
+			if (h.canHandle(url)) {
 				handler = h;
 				break;
 			}
