@@ -1,7 +1,7 @@
 package info.mineshafter;
 
 import info.mineshafter.hacks.URLHandlerFactory;
-import info.mineshafter.mod.JarPatcher;
+import info.mineshafter.util.JarPatcher;
 import info.mineshafter.util.Resources;
 import info.mineshafter.util.Streams;
 
@@ -16,6 +16,7 @@ import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;

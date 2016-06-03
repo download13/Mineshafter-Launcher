@@ -1,6 +1,4 @@
-package info.mineshafter.mod;
-
-import info.mineshafter.util.Streams;
+package info.mineshafter.util;
 
 import java.io.File;
 import java.io.FileInputStream;
