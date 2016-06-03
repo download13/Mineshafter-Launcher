@@ -1,12 +1,13 @@
 package info.mineshafter.intercept;
 
 public class Response extends Message {
-	public int status;
+	private int status;
 
 	public Response(byte[] b) {
-		this(200, b);
+		status = 200;
+		body = b;
 	}
-	
+
 	public Response(int stat, String b) {
 		status = stat;
 		body = b.getBytes();
@@ -15,5 +16,9 @@ public class Response extends Message {
 	public Response(int stat, byte[] b) {
 		status = stat;
 		body = b;
+	}
+
+	public int getStatus() {
+		return status;
 	}
 }

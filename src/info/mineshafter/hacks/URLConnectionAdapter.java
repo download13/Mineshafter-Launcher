@@ -37,14 +37,14 @@ public class URLConnectionAdapter extends HttpURLConnection {
 		if (didRequest) return;
 
 		if (doOutput && bodyStream.size() > 0) {
-			req.body = bodyStream.toByteArray();
+			req.setBody(bodyStream.toByteArray());
 		}
 
 		res = handler.handle(req);
 
-		responseCode = res.status;
+		responseCode = res.getStatus();
 
-		replyStream = new ByteArrayInputStream(res.body);
+		replyStream = new ByteArrayInputStream(res.getBody());
 	}
 
 	public int getResponseCode() {

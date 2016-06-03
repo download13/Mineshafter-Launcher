@@ -8,19 +8,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class Message {
 	private Map<String, List<String>> headers = new ConcurrentHashMap<String, List<String>>();
-	public byte[] body;
+	protected byte[] body;
 
 	public Map<String, List<String>> getHeaders() {
 		return Collections.unmodifiableMap(headers);
 	}
-	
+
 	public void setHeader(String key, String value) {
 		List<String> items = Collections.synchronizedList(new ArrayList<String>());
 		items.add(value);
 
 		headers.put(key, items);
 	}
-	
+
 	public void addHeader(String key, String value) {
 		List<String> items = headers.get(key);
 
@@ -30,5 +30,13 @@ public abstract class Message {
 		}
 
 		items.add(value);
+	}
+
+	public byte[] getBody() {
+		return body;
+	}
+
+	public void setBody(byte[] b) {
+		body = b;
 	}
 }
