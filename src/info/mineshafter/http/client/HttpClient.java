@@ -1,4 +1,4 @@
-package info.mineshafter.util;
+package info.mineshafter.http.client;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -15,11 +15,45 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-public class Http {
-
-	public static byte[] getRequest(String url) {
+public class HttpClient {
+	public static byte[] get(String url) {
 		try {
-			HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection(Proxy.NO_PROXY);
+			return get(new URL(url));
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return new byte[0];
+		}
+	}
+
+	public static byte[] getRaw(String urlstring) {
+		try {
+			return get(toRaw(new URL(urlstring)));
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return new byte[0];
+		}
+	}
+
+	public static byte[] get(URL url) {
+		return getRequest(url);
+	}
+
+	public static byte[] getRaw(URL url) {
+		try {
+			return getRequest(toRaw(url));
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return new byte[0];
+		}
+	}
+
+	private static URL toRaw(URL url) throws MalformedURLException {
+		return new URL("raw" + url.getProtocol(), url.getHost(), url.getPort(), url.getFile());
+	}
+
+	private static byte[] getRequest(URL url) {
+		try {
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection(Proxy.NO_PROXY);
 			conn.setUseCaches(false);
 			conn.setInstanceFollowRedirects(true);
 			Map<String, List<String>> requestHeaders = conn.getRequestProperties();
@@ -29,7 +63,7 @@ public class Http {
 				System.out.println("Java didn't redirect automatically, going manual: " + Integer.toString(code));
 				String loc = conn.getHeaderField("location").trim();
 				System.out.println("Manual redirection to: " + loc);
-				return getRequest(loc);
+				return getRequest(new URL(loc));
 			}
 
 			System.out.println("Response: " + code);
@@ -73,7 +107,7 @@ public class Http {
 		return new byte[0];
 	}
 
-	public static byte[] postRequest(String url, String postdata, String contentType) {
+	public static byte[] post(String url, String postdata, String contentType) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		OutputStreamWriter writer = new OutputStreamWriter(out);
 		// System.out.println("Postdata: " + postdata);
@@ -85,12 +119,12 @@ public class Http {
 			e.printStackTrace();
 		}
 
-		byte[] rd = postRequest(url, out.toByteArray(), contentType);
+		byte[] rd = post(url, out.toByteArray(), contentType);
 
 		return rd;
 	}
 
-	public static byte[] postRequest(String url, byte[] postdata, String contentType) {
+	public static byte[] post(String url, byte[] postdata, String contentType) {
 		try {
 			URL u = new URL(url);
 
