@@ -41,18 +41,18 @@ public class ProfileHandler implements Handler {
 	public Response handle(Request req) {
 		String r = "";
 
-		if (req.host.equalsIgnoreCase(GET_HOST)) {
-			Matcher m = GET_PATH.matcher(req.path);
+		if (req.getHost().equalsIgnoreCase(GET_HOST)) {
+			Matcher m = GET_PATH.matcher(req.getPath());
 			// TODO: Console output
 			if (m.matches()) {
 				String uuid = m.group(1);
 
 				r = getProfile(uuid);
 			}
-		} else if (req.host.equalsIgnoreCase(SEARCH_HOST)) {
+		} else if (req.getHost().equalsIgnoreCase(SEARCH_HOST)) {
 			String body = new String(req.body);
 
-			Matcher m = SEARCH_PATH.matcher(req.path);
+			Matcher m = SEARCH_PATH.matcher(req.getPath());
 
 			if (m.matches()) {
 				int page = Integer.parseInt(m.group(1));

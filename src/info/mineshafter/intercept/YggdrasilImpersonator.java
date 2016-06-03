@@ -1,10 +1,10 @@
 package info.mineshafter.intercept;
 
-import java.net.URL;
-
 import info.mineshafter.Util;
 import info.mineshafter.models.Profile;
 import info.mineshafter.storage.Profiles;
+
+import java.net.URL;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
@@ -36,7 +36,7 @@ public class YggdrasilImpersonator implements Handler {
 
 		JsonObject yggreq = JsonObject.readFrom(new String(req.body));
 
-		String path = req.path.toLowerCase();
+		String path = req.getPath().toLowerCase();
 
 		if (path.equals("/authenticate")) {
 			r = authenticate(yggreq);

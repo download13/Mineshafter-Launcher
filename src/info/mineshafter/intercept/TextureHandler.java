@@ -1,5 +1,7 @@
 package info.mineshafter.intercept;
 
+import info.mineshafter.util.Streams;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -10,8 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import info.mineshafter.util.Streams;
 
 public class TextureHandler implements Handler {
 	private Map<String, URL> skinLookup = new ConcurrentHashMap<String, URL>();
@@ -51,7 +51,7 @@ public class TextureHandler implements Handler {
 
 	public Response handle(Request req) {
 		try {
-			Matcher m = textureUrl.matcher(req.path);
+			Matcher m = textureUrl.matcher(req.getPath());
 			m.matches();
 			String hash = m.group(1);
 			String id = hash.substring(0, 32);

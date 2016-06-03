@@ -3,11 +3,21 @@ package info.mineshafter.intercept;
 import java.net.URL;
 
 public class Request extends Message {
-	public String host;
-	public String path;
-	
+	private URL url;
+
 	public Request(URL u) {
-		host = u.getHost();
-		path = u.getPath();
+		url = u;
+	}
+
+	public URL getUrl() {
+		return url;
+	}
+
+	public String getHost() {
+		return url.getHost();
+	}
+
+	public String getPath() {
+		return url.getFile();
 	}
 }
