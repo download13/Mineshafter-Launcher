@@ -19,7 +19,7 @@ public class MetadataHandler implements Handler {
 	private static MetadataHandler instance;
 	private static String METADATA_HOST = "launchermeta.mojang.com";
 	private static String LIBRARY_HOST = "libraries.minecraft.net";
-	private static Pattern manifestMatcher = Pattern.compile("/mc/game/");
+	private static Pattern manifestMatcher = Pattern.compile("/mc/game/[a-fA-F0-9]+/.*\\.json");
 	private static Map<String, byte[]> artifactCache = new ConcurrentHashMap<String, byte[]>();
 
 	public static synchronized MetadataHandler getInstance() {
@@ -46,13 +46,14 @@ public class MetadataHandler implements Handler {
 		if (m.matches()) return handleManifest(req);
 
 		String cacheKey = req.getUrl().toString();
-		if (artifactCache.containsKey(cacheKey)) { return new Response(artifactCache.get(cacheKey)); }
+		if (artifactCache.containsKey(cacheKey)) return handleArtifact(cacheKey);
 
 		return null;
 	}
 
 	private Response handleManifest(Request req) {
-		String manifest = new String(HttpClient.get(req.getUrl()));
+		String authlibUrl = null;
+		String manifest = new String(HttpClient.getRaw(req.getUrl()));
 		JsonObject manifestJson = JsonObject.readFrom(manifest);
 		JsonArray libraries = manifestJson.get("libraries").asArray();
 		for (JsonValue v : libraries) {
@@ -60,21 +61,30 @@ public class MetadataHandler implements Handler {
 			String name = lib.get("name").asString();
 			if (name.contains("authlib")) {
 				JsonObject artifact = lib.get("downloads").asObject().get("artifact").asObject();
-				String auhtlibUrl = artifact.get("url").asString();
-				byte[] authlibData = HttpClient.getRaw(auhtlibUrl);
+				authlibUrl = artifact.get("url").asString();
+				byte[] authlibData = HttpClient.getRaw(authlibUrl);
 				byte[] patchedAuthlibData = patchAuthlib(authlibData);
 				String patchedAuthlibHash = Hash.sha1(patchedAuthlibData);
 				artifact.set("sha1", patchedAuthlibHash);
 				artifact.set("size", patchedAuthlibData.length);
+				break;
 			}
 		}
 
-		return new Response(manifestJson.toString());
+		byte[] manifestData = manifestJson.toString().getBytes();
+		if (authlibUrl != null) {
+			artifactCache.put(authlibUrl, manifestData);
+		}
+		return new Response(manifestData);
 	}
 
 	private byte[] patchAuthlib(byte[] authlibData) {
 		JarPatcher patcher = new JarPatcher(authlibData);
 		patcher.setEntry("com/mojang/authlib/properties/Property.class", Resources.loadByteArray("resources/Property.class"));
 		return patcher.write();
+	}
+
+	private Response handleArtifact(String cacheKey) {
+		return new Response(artifactCache.get(cacheKey));
 	}
 }
