@@ -92,13 +92,10 @@ public class Bootstrap extends JFrame {
 		}
 		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner.class", Resources.loadByteArray("resources/MinecraftGameRunner.class"));
 		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner$1.class", Resources.loadByteArray("resources/MinecraftGameRunner$1.class"));
-		patcher.setEntry("yggdrasil_session_pubkey.der", Resources.loadByteArray("resources/ms_pubkey.der"));
 
-		patcher.setEntry("info/mineshafter/mod/JarPatcher.class", Resources.loadByteArray("info/mineshafter/mod/JarPatcher.class"));
-		patcher.setEntry("info/mineshafter/util/Streams.class", Resources.loadByteArray("info/mineshafter/util/Streams.class"));
-		patcher.setEntry("info/mineshafter/util/Resources.class", Resources.loadByteArray("info/mineshafter/util/Resources.class"));
-
-		patcher.setEntry("resources/Property.class", Resources.loadByteArray("resources/Property.class"));
+		//patcher.setEntry("info/mineshafter/mod/JarPatcher.class", Resources.loadByteArray("info/mineshafter/mod/JarPatcher.class"));
+		//patcher.setEntry("info/mineshafter/util/Streams.class", Resources.loadByteArray("info/mineshafter/util/Streams.class"));
+		//patcher.setEntry("info/mineshafter/util/Resources.class", Resources.loadByteArray("info/mineshafter/util/Resources.class"));
 
 		patcher.write(patchedLauncherJar);
 	}
