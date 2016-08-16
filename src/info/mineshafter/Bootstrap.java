@@ -87,7 +87,10 @@ public class Bootstrap extends JFrame {
 		JarPatcher patcher = new JarPatcher(launcherJar);
 		for (String name : patcher.getEntries()) { // Get rid of all that metadata
 			if (name.startsWith("META-INF/")) {
-				patcher.removeEntry(name);
+                                //Ignore this file. It is needed for Console Tab and logging related.
+                                if (!name.contains("log4j-provider.properties")){
+                                    patcher.removeEntry(name);
+                                }
 			}
 		}
 		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner.class", Resources.loadByteArray("resources/MinecraftGameRunner.class"));
