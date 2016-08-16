@@ -50,14 +50,19 @@ public class Hash {
 	}
 
 	private static String hash(String algorithm, byte[] input) {
-		byte[] digest;
-		try {
-			digest = MessageDigest.getInstance(algorithm).digest();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return "";
-		}
-
-		return String.format("%1$032x", new Object[] { new BigInteger(1, digest) });
+            try {
+                MessageDigest sha1 = MessageDigest.getInstance(algorithm);
+                sha1.update(input);
+                byte[] hashBytes = sha1.digest();
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hashBytes.length; i++) {
+                  sb.append(Integer.toString((hashBytes[i] & 0xff) + 0x100, 16).substring(1));
+                }
+                String fileHash = sb.toString();
+                return fileHash;
+            } catch (NoSuchAlgorithmException ex) {
+                ex.printStackTrace();
+                return "";
+            }
 	}
 }

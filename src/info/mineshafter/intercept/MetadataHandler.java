@@ -14,6 +14,10 @@ import java.util.regex.Pattern;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import info.mineshafter.Util;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 public class MetadataHandler implements Handler {
 	private static MetadataHandler instance;
@@ -63,10 +67,19 @@ public class MetadataHandler implements Handler {
 				JsonObject artifact = lib.get("downloads").asObject().get("artifact").asObject();
 				authlibUrl = artifact.get("url").asString();
 				byte[] authlibData = HttpClient.getRaw(authlibUrl);
-				byte[] patchedAuthlibData = patchAuthlib(authlibData);
-				String patchedAuthlibHash = Hash.sha1(patchedAuthlibData);
+                                File outputFile = new File(Util.getWorkingDirectory() + File.separator + "libraries" + File.separator + Util.getArtifactPath(name, "jar"));
+				if (!outputFile.getParentFile().exists()){
+                                    outputFile.getParentFile().mkdirs();
+                                }
+                                patchAuthlib(authlibData, outputFile);
+				String patchedAuthlibHash = null;
+                                try {
+                                    patchedAuthlibHash = Hash.sha1(new FileInputStream(outputFile));
+                                } catch (FileNotFoundException ex) {
+                                    System.out.println("Failed to get authlib sha1.");
+                                }
 				artifact.set("sha1", patchedAuthlibHash);
-				artifact.set("size", patchedAuthlibData.length);
+				artifact.set("size", outputFile.length());
 				break;
 			}
 		}
@@ -78,10 +91,10 @@ public class MetadataHandler implements Handler {
 		return new Response(manifestData);
 	}
 
-	private byte[] patchAuthlib(byte[] authlibData) {
+	private void patchAuthlib(byte[] authlibData, File output) {
 		JarPatcher patcher = new JarPatcher(authlibData);
 		patcher.setEntry("com/mojang/authlib/properties/Property.class", Resources.loadByteArray("resources/Property.class"));
-		return patcher.write();
+		patcher.write(output);
 	}
 
 	private Response handleArtifact(String cacheKey) {
