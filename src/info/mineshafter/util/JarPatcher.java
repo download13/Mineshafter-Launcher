@@ -62,7 +62,11 @@ public class JarPatcher {
 	public void removeEntry(String name) {
 		entries.remove(name);
 	}
-
+        
+        public byte[] getEntry(String name){
+            return entries.get(name);
+        }
+        
 	public Collection<String> getEntries() {
 		return new HashSet<String>(entries.keySet());
 	}
