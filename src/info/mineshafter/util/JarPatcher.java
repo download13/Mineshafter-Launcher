@@ -1,7 +1,6 @@
 package info.mineshafter.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -62,7 +61,11 @@ public class JarPatcher {
 	public void removeEntry(String name) {
 		entries.remove(name);
 	}
-
+        
+        public byte[] getEntry(String name){
+            return entries.get(name);
+        }
+        
 	public Collection<String> getEntries() {
 		return new HashSet<String>(entries.keySet());
 	}
@@ -93,11 +96,5 @@ public class JarPatcher {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public byte[] write() {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		write(out);
-		return out.toByteArray();
 	}
 }

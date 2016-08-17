@@ -86,9 +86,19 @@ public class Bootstrap extends JFrame {
 
 		JarPatcher patcher = new JarPatcher(launcherJar);
 		for (String name : patcher.getEntries()) { // Get rid of all that metadata
-			if (name.startsWith("META-INF/")) {
-				patcher.removeEntry(name);
-			}
+                    if (name.startsWith("META-INF/")) {
+                        if (name.contains("MANIFEST.MF")){
+                            //Remove MANIFEST.MF signatures
+                            //Also this file contains Implementation-Version parameter which is loaded by the launcher as the launcher version
+                            byte[] manifestData = patcher.getEntry(name);
+                            String manifestString = new String(manifestData);
+                            String rippedData = manifestString.substring(0, manifestString.indexOf("Name"));
+                            patcher.setEntry(name, rippedData.getBytes());
+                        } else if (!name.contains("log4j-provider.properties")){
+                            //Ignore this file. It is needed for Console Tab and logging related.
+                            patcher.removeEntry(name);
+                        }   
+                    }
 		}
 		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner.class", Resources.loadByteArray("resources/MinecraftGameRunner.class"));
 		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner$1.class", Resources.loadByteArray("resources/MinecraftGameRunner$1.class"));
