@@ -74,9 +74,12 @@ public class ProfileHandler implements Handler {
 		Profile p = profiles.getProfile(id);
 
 		JsonObject textures = new JsonObject();
-		textures.set("SKIN", new JsonObject().add("url", p.getSkin()));
-		textures.set("CAPE", new JsonObject().add("url", p.getCape()));
-
+                if (p.getSkin() != null){
+                    textures.set("SKIN", new JsonObject().add("url", p.getSkin()));
+                }
+		if (p.getCape() != null){
+                    textures.set("CAPE", new JsonObject().add("url", p.getCape()));
+                }
 		JsonObject textureProperty = new JsonObject();
 		textureProperty.set("timestamp", System.currentTimeMillis());
 		textureProperty.set("profileId", p.getId());
