@@ -18,6 +18,9 @@ public class Request extends Message {
 	}
 
 	public String getPath() {
-		return url.getFile();
+		return url.getPath();
 	}
+        public String getQuery(){
+            return url.getQuery();
+        }
 }
