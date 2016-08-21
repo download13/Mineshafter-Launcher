@@ -45,6 +45,7 @@ public class URLConnectionAdapter extends HttpURLConnection {
 		responseCode = res.getStatus();
 
 		replyStream = new ByteArrayInputStream(res.getBody());
+                didRequest = true;
 	}
 
 	public int getResponseCode() {
