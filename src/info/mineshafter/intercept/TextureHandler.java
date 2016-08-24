@@ -12,13 +12,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.net.ssl.HttpsURLConnection;
 
 public class TextureHandler implements Handler {
 	private Map<String, URL> skinLookup = new ConcurrentHashMap<String, URL>();
 	private Map<String, URL> capeLookup = new ConcurrentHashMap<String, URL>();
 
 	private static String textureHost = "textures.minecraft.net";
-	private static Pattern textureUrl = Pattern.compile("/texture/([0-9a-fA-F]+)");
+	private static Pattern textureUrl = Pattern.compile("/([0-9a-fA-F]+)");
 	private static TextureHandler instance;
 
 	public static synchronized TextureHandler getInstance() {
@@ -65,10 +66,34 @@ public class TextureHandler implements Handler {
 			}
 
 			//System.out.println("TextureHandler.handle type: " + type);
-
-			HttpURLConnection conn = (HttpURLConnection) skinUrl.openConnection();
-			byte[] data = Streams.toByteArray(conn.getInputStream());
-
+                        byte[] data = new byte[0];
+                        int responseCode = 404;
+                        if (skinUrl != null){
+                            String protocol = skinUrl.getProtocol();
+                            if (protocol.equalsIgnoreCase("https")){
+                                HttpsURLConnection conn = (HttpsURLConnection) skinUrl.openConnection();
+                                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
+                                conn.setInstanceFollowRedirects(true);
+                                responseCode = conn.getResponseCode();
+                                data = Streams.toByteArray(conn.getInputStream());
+                                
+                            } else if (protocol.equalsIgnoreCase("http")){
+                                HttpURLConnection conn = (HttpURLConnection) skinUrl.openConnection();
+                                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
+                                conn.setInstanceFollowRedirects(true);
+                                responseCode = conn.getResponseCode();
+                                data = Streams.toByteArray(conn.getInputStream());
+                                if (data.length == 0){
+                                    return new Response(responseCode, data);
+                                }
+                            }
+                        } else {
+                            return new Response(404, data);
+                        }
+                        System.out.println("Texture response code: " + responseCode);
+                        if (data.length == 0){
+                            return new Response(responseCode, data);
+                        }
 			return new Response(data);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -81,14 +106,14 @@ public class TextureHandler implements Handler {
 	public String addSkin(String id, String skinUrl) {
 		try {
 			URL url = new URL(skinUrl);
-			url = new URL("raw" + url.getProtocol(), url.getHost(), url.getPort(), url.getFile()); // Make sure we don't loop getting a handled url
+			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile()); // Make sure we don't loop getting a handled url
 			skinLookup.put(id, url);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 
 		// id: 32 chars, idPadding: 14 chars, urlPadding: 14 chars, type: 1 char
-		String r = "http://textures.minecraft.net/texture/" + id + createPadding(id) + createPadding(skinUrl) + "0";
+		String r = "http://textures.minecraft.net/" + id + createPadding(id) + createPadding(skinUrl) + "0";
 		//System.out.println(r + " = " + id + ":" + skinUrl);
 		return r;
 	}
@@ -96,13 +121,13 @@ public class TextureHandler implements Handler {
 	public String addCape(String id, String capeUrl) {
 		try {
 			URL url = new URL(capeUrl);
-			url = new URL("raw" + url.getProtocol(), url.getHost(), url.getPort(), url.getFile());
+			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile());
 			capeLookup.put(id, url);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 
-		String r = "http://textures.minecraft.net/texture/" + id + createPadding(id) + createPadding(capeUrl) + "1";
+		String r = "http://textures.minecraft.net/" + id + createPadding(id) + createPadding(capeUrl) + "1";
 		//System.out.println(r + " = " + id + ":" + capeUrl);
 		return r;
 	}
