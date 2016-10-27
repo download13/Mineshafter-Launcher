@@ -15,15 +15,15 @@ import java.net.URLEncoder;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
-public class MineshafterProfileAuthority implements ProfileAuthority {
+public class MineshafterProfileAuthority {
 	private static final String API_URL = "http://mineshafter.info/mcapi/profile";
 	private static TextureHandler textureHandler = TextureHandler.getInstance();
 
-	private static ProfileAuthority instance;
+	private static MineshafterProfileAuthority instance;
 
 	private MineshafterProfileAuthority() {}
 
-	public static synchronized ProfileAuthority getInstance() {
+	public static synchronized MineshafterProfileAuthority getInstance() {
 		if (instance == null) {
 			instance = new MineshafterProfileAuthority();
 		}

@@ -1,19 +1,18 @@
 package info.mineshafter.intercept;
 
 import info.mineshafter.Util;
-import info.mineshafter.datasources.AutomaticProfileAuthority;
+import info.mineshafter.datasources.MineshafterProfileAuthority;
 import info.mineshafter.models.Profile;
 
 import java.net.URL;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 
 public class YggdrasilImpersonator implements Handler {
 	private static String HOST = "authserver.mojang.com";
 
-	private static AutomaticProfileAuthority profiles = AutomaticProfileAuthority.getInstance();
+	private static MineshafterProfileAuthority profiles = MineshafterProfileAuthority.getInstance();
 
 	private static YggdrasilImpersonator instance;
 
@@ -78,26 +77,6 @@ public class YggdrasilImpersonator implements Handler {
 	}
 
 	public String refresh(JsonObject req) {
-		String accessToken = req.get("accessToken").asString();
-		String clientToken = req.get("clientToken").asString();
-
-		Profile p = profiles.getProfileByAccessToken(req.get("accessToken").asString());
-
-		if (p == null) { return "{\"error\":\"ForbiddenOperationException\",\"errorMessage\":\"Invalid token.\"}"; }
-
-		String newAccessToken = Util.getMd5(accessToken + Long.toString(System.currentTimeMillis()));
-		p.setAccessToken(newAccessToken);
-
-		JsonObject user = new JsonObject();
-		user.set("id", p.getId());
-		user.set("name", p.getName());
-
-		JsonObject response = new JsonObject();
-		response.set("clientToken", clientToken);
-		response.set("accessToken", newAccessToken);
-		response.set("selectedProfile", user);
-		response.set("availableProfiles", JsonValue.NULL);
-
-		return response.toString();
+		return "{\"error\":\"ForbiddenOperationException\",\"errorMessage\":\"Invalid token.\"}";
 	}
 }

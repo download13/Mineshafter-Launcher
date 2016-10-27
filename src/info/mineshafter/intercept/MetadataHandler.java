@@ -1,10 +1,14 @@
 package info.mineshafter.intercept;
 
+import info.mineshafter.Util;
 import info.mineshafter.crypto.Hash;
 import info.mineshafter.http.client.HttpClient;
 import info.mineshafter.util.JarPatcher;
 import info.mineshafter.util.Resources;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,10 +18,6 @@ import java.util.regex.Pattern;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
-import info.mineshafter.Util;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 public class MetadataHandler implements Handler {
 	private static MetadataHandler instance;
@@ -67,23 +67,25 @@ public class MetadataHandler implements Handler {
 				JsonObject artifact = lib.get("downloads").asObject().get("artifact").asObject();
 				authlibUrl = artifact.get("url").asString();
 				byte[] authlibData = HttpClient.getRaw(authlibUrl);
-                                File outputFile = new File(Util.getWorkingDirectory() + File.separator + "libraries" + File.separator + Util.getArtifactPath(name, "jar"));
-				if (!outputFile.getParentFile().exists()){
-                                    outputFile.getParentFile().mkdirs();
-                                }
-                                patchAuthlib(authlibData, outputFile);
+				File outputFile = new File(Util.getWorkingDirectory() + File.separator + "libraries" + File.separator + Util.getArtifactPath(name, "jar"));
+				if (!outputFile.getParentFile().exists()) {
+					outputFile.getParentFile().mkdirs();
+				}
+				patchAuthlib(authlibData, outputFile);
 				String patchedAuthlibHash = null;
-                                try {
-                                    patchedAuthlibHash = Hash.sha1(new FileInputStream(outputFile));
-                                } catch (FileNotFoundException ex) {
-                                    System.out.println("Failed to get authlib sha1.");
-                                }
+				try {
+					patchedAuthlibHash = Hash.sha1(new FileInputStream(outputFile));
+				} catch (FileNotFoundException ex) {
+					System.out.println("Failed to get authlib sha1.");
+				}
 				artifact.set("sha1", patchedAuthlibHash);
 				artifact.set("size", outputFile.length());
 				break;
 			}
 		}
 
+		System.out.print("Updated manifest:");
+		System.out.println(manifestJson.toString());
 		byte[] manifestData = manifestJson.toString().getBytes();
 		if (authlibUrl != null) {
 			artifactCache.put(authlibUrl, manifestData);

@@ -1,6 +1,6 @@
 package info.mineshafter.intercept;
 
-import info.mineshafter.datasources.AutomaticProfileAuthority;
+import info.mineshafter.datasources.MineshafterProfileAuthority;
 import info.mineshafter.models.Profile;
 
 import java.net.URL;
@@ -20,7 +20,7 @@ public class ProfileHandler implements Handler {
 	private static Pattern SEARCH_PATH = Pattern.compile("/profiles/page/(.+?)");
 	private static Pattern GET_PATH = Pattern.compile("/session/minecraft/profile/([0-9a-fA-F]+?)");
 
-	private static AutomaticProfileAuthority profiles = AutomaticProfileAuthority.getInstance();
+	private static MineshafterProfileAuthority profiles = MineshafterProfileAuthority.getInstance();
 
 	private static ProfileHandler instance;
 
@@ -74,12 +74,12 @@ public class ProfileHandler implements Handler {
 		Profile p = profiles.getProfile(id);
 
 		JsonObject textures = new JsonObject();
-                if (p.getSkin() != null){
-                    textures.set("SKIN", new JsonObject().add("url", p.getSkin()));
-                }
-		if (p.getCape() != null){
-                    textures.set("CAPE", new JsonObject().add("url", p.getCape()));
-                }
+		if (p.getSkin() != null) {
+			textures.set("SKIN", new JsonObject().add("url", p.getSkin()));
+		}
+		if (p.getCape() != null) {
+			textures.set("CAPE", new JsonObject().add("url", p.getCape()));
+		}
 		JsonObject textureProperty = new JsonObject();
 		textureProperty.set("timestamp", System.currentTimeMillis());
 		textureProperty.set("profileId", p.getId());
