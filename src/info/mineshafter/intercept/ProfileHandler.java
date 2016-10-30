@@ -19,6 +19,7 @@ public class ProfileHandler implements Handler {
 
 	private static Pattern SEARCH_PATH = Pattern.compile("/profiles/page/(.+?)");
 	private static Pattern GET_PATH = Pattern.compile("/session/minecraft/profile/([0-9a-fA-F]+?)");
+	private static Pattern BLOCKED_PATH = Pattern.compile("/blockedservers");
 
 	private static MineshafterProfileAuthority profiles = MineshafterProfileAuthority.getInstance();
 
@@ -48,6 +49,15 @@ public class ProfileHandler implements Handler {
 				String uuid = m.group(1);
 
 				r = getProfile(uuid);
+			} else {
+				m = BLOCKED_PATH.matcher(req.getPath());
+
+				if (m.matches()) {
+					Response res = new Response(new byte[] {});
+					res.setHeader("content-type", "text/plain; charset=UTF-8");
+					res.setHeader("content-length", "0");
+					return res;
+				}
 			}
 		} else if (req.getHost().equalsIgnoreCase(SEARCH_HOST)) {
 			String body = new String(req.body);
