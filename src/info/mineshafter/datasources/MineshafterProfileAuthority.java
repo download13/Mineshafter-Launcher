@@ -59,11 +59,11 @@ public class MineshafterProfileAuthority {
 			JsonValue capeVal = pj.get("cape");
 			String url;
 
-			if (skinVal != null && !skinVal.isNull()) {
+			if (skinVal != null && !skinVal.isNull() && !skinVal.asString().isEmpty()) {
 				url = textureHandler.addSkin(id, skinVal.asString());
 				p.setSkin(url);
 			}
-			if (capeVal != null && !capeVal.isNull()) {
+			if (capeVal != null && !capeVal.isNull() && !capeVal.asString().isEmpty()) {
 				url = textureHandler.addCape(id, capeVal.asString());
 				p.setCape(url);
 			}
@@ -78,6 +78,8 @@ public class MineshafterProfileAuthority {
 
 	// name is the username, returns a Profile object
 	public Profile searchProfile(String name) {
+		System.out.println("MineshafterProfileClient.searchProfile(" + name + ")");
+
 		try {
 			name = URLEncoder.encode(name, "UTF-8");
 			URL u = new URL(API_URL + "?username=" + name);
