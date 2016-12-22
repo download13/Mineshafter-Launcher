@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.net.ssl.HttpsURLConnection;
 
 public class TextureHandler implements Handler {
@@ -66,34 +67,30 @@ public class TextureHandler implements Handler {
 			}
 
 			//System.out.println("TextureHandler.handle type: " + type);
-                        byte[] data = new byte[0];
-                        int responseCode = 404;
-                        if (skinUrl != null){
-                            String protocol = skinUrl.getProtocol();
-                            if (protocol.equalsIgnoreCase("https")){
-                                HttpsURLConnection conn = (HttpsURLConnection) skinUrl.openConnection();
-                                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
-                                conn.setInstanceFollowRedirects(true);
-                                responseCode = conn.getResponseCode();
-                                data = Streams.toByteArray(conn.getInputStream());
-                                
-                            } else if (protocol.equalsIgnoreCase("http")){
-                                HttpURLConnection conn = (HttpURLConnection) skinUrl.openConnection();
-                                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
-                                conn.setInstanceFollowRedirects(true);
-                                responseCode = conn.getResponseCode();
-                                data = Streams.toByteArray(conn.getInputStream());
-                                if (data.length == 0){
-                                    return new Response(responseCode, data);
-                                }
-                            }
-                        } else {
-                            return new Response(404, data);
-                        }
-                        System.out.println("Texture response code: " + responseCode);
-                        if (data.length == 0){
-                            return new Response(responseCode, data);
-                        }
+			byte[] data = new byte[0];
+			int responseCode = 404;
+			if (skinUrl != null) {
+				String protocol = skinUrl.getProtocol();
+				if (protocol.equalsIgnoreCase("https")) {
+					HttpsURLConnection conn = (HttpsURLConnection) skinUrl.openConnection();
+					conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
+					conn.setInstanceFollowRedirects(true);
+					responseCode = conn.getResponseCode();
+					data = Streams.toByteArray(conn.getInputStream());
+
+				} else if (protocol.equalsIgnoreCase("http")) {
+					HttpURLConnection conn = (HttpURLConnection) skinUrl.openConnection();
+					conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
+					conn.setInstanceFollowRedirects(true);
+					responseCode = conn.getResponseCode();
+					data = Streams.toByteArray(conn.getInputStream());
+					if (data.length == 0) { return new Response(responseCode, data); }
+				}
+			} else {
+				return new Response(404, data);
+			}
+			System.out.println("Texture response code: " + responseCode);
+			if (data.length == 0) { return new Response(responseCode, data); }
 			return new Response(data);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -110,6 +107,7 @@ public class TextureHandler implements Handler {
 			skinLookup.put(id, url);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
+			return skinUrl;
 		}
 
 		// id: 32 chars, idPadding: 14 chars, urlPadding: 14 chars, type: 1 char
@@ -125,6 +123,7 @@ public class TextureHandler implements Handler {
 			capeLookup.put(id, url);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
+			return capeUrl;
 		}
 
 		String r = "http://textures.minecraft.net/" + id + createPadding(id) + createPadding(capeUrl) + "1";

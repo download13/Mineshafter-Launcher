@@ -46,15 +46,14 @@ public class MineshafterProfileAuthority {
 
 			System.out.println("MS.getProfile: " + profileJSON);
 
-			if (profileJSON == null || profileJSON.length() == 0) { return null; }
+			if (profileJSON == null || profileJSON.length() == 0) { return new Profile(); }
 
 			JsonObject pj = JsonObject.readFrom(profileJSON);
 
 			// TODO: md5 the username/email
 			// server will return a profile for the email if there is one
 			// then it will
-			Profile p = new Profile(id);
-			p.setName(pj.get("username").asString());
+			Profile p = new Profile(pj.get("username").asString(), id);
 			JsonValue skinVal = pj.get("skin");
 			JsonValue capeVal = pj.get("cape");
 			String url;
@@ -63,6 +62,7 @@ public class MineshafterProfileAuthority {
 				url = textureHandler.addSkin(id, skinVal.asString());
 				p.setSkin(url);
 			}
+
 			if (capeVal != null && !capeVal.isNull() && !capeVal.asString().isEmpty()) {
 				url = textureHandler.addCape(id, capeVal.asString());
 				p.setCape(url);
@@ -73,7 +73,7 @@ public class MineshafterProfileAuthority {
 			e.printStackTrace();
 		}
 
-		return null;
+		return new Profile();
 	}
 
 	// name is the username, returns a Profile object
@@ -89,12 +89,9 @@ public class MineshafterProfileAuthority {
 			String uuid = Streams.toString(in);
 			Streams.close(in);
 
-			if (uuid == null || uuid.length() == 0) { return null; }
+			if (uuid == null || uuid.length() == 0) { return new Profile(name); }
 
-			Profile p = new Profile(uuid);
-			p.setName(name);
-
-			return p;
+			return new Profile(name, uuid);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (MalformedURLException e) {
@@ -103,6 +100,6 @@ public class MineshafterProfileAuthority {
 			e.printStackTrace();
 		}
 
-		return null;
+		return new Profile(name);
 	}
 }

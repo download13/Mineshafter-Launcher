@@ -1,20 +1,21 @@
 package info.mineshafter.models;
 
 public final class Profile {
-	private String uuid = null;
-	private String name = null;
-	private String accessToken = null;
-	private String skinUrl = null;
-	private String capeUrl = null;
-	private boolean officialOrigin;
+	private String uuid = "2250f5f7-e486-47d6-81c5-6b93efcd40af";
+	private String name = "unknownuser";
+	private String accessToken = "305557da-72fa-4ff6-b373-1e92c6556d48";
+	private String skinUrl = "";
+	private String capeUrl = "";
 
-	public Profile(String id) {
-		this(id, true);
+	public Profile() {}
+
+	public Profile(String username) {
+		name = username;
 	}
 
-	public Profile(String id, boolean official) {
+	public Profile(String username, String id) {
 		uuid = id;
-		officialOrigin = official;
+		name = username;
 	}
 
 	public String getId() {
@@ -51,9 +52,5 @@ public final class Profile {
 
 	public void setCape(String capeurl) {
 		capeUrl = capeurl;
-	}
-
-	public boolean isOfficial() {
-		return officialOrigin;
 	}
 }

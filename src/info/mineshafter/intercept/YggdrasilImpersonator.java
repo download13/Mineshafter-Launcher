@@ -60,11 +60,11 @@ public class YggdrasilImpersonator implements Handler {
 
 		String accessToken = Util.getMd5(username + password + Long.toString(System.currentTimeMillis()));
 
-		Profile p = profiles.searchProfile(username);
-
+		Profile profile = profiles.searchProfile(username);
 		JsonObject user = new JsonObject();
-		user.set("id", p.getId());
-		user.set("name", p.getName());
+
+		user.set("id", profile.getId());
+		user.set("name", profile.getName());
 
 		JsonObject response = new JsonObject();
 		response.set("clientToken", clientToken);
