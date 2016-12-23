@@ -16,7 +16,7 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
 public class MineshafterProfileAuthority {
-	private static final String API_URL = "http://mineshafter.info/mcapi/profile";
+	private static final String API_URL = "https://mineshafter.info/mcapi/profile";
 	private static TextureHandler textureHandler = TextureHandler.getInstance();
 
 	private static MineshafterProfileAuthority instance;

@@ -131,7 +131,7 @@ public class Util {
 
 	public static float getCurrentBootstrapVersion() {
 		try {
-			byte[] verdata = HttpClient.get(new URL("http://mineshafter.info/bootver"));
+			byte[] verdata = HttpClient.get(new URL("https://mineshafter.info/bootver"));
 			String verstring;
 			if (verdata == null) verstring = "0";
 			else verstring = new String(verdata);
@@ -189,8 +189,9 @@ public class Util {
 			e.printStackTrace();
 		}
 	}
-        public static String getArtifactPath(String artifact, String ext) {
-            final String[] parts = artifact.split(":", 3);
-            return String.format("%s/%s/%s/%s." + ext, parts[0].replaceAll("\\.", "/"), parts[1], parts[2], parts[1] + "-" + parts[2]);
-        }
+
+	public static String getArtifactPath(String artifact, String ext) {
+		final String[] parts = artifact.split(":", 3);
+		return String.format("%s/%s/%s/%s." + ext, parts[0].replaceAll("\\.", "/"), parts[1], parts[2], parts[1] + "-" + parts[2]);
+	}
 }
