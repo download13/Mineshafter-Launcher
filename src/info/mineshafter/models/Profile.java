@@ -1,5 +1,7 @@
 package info.mineshafter.models;
 
+import info.mineshafter.Util;
+
 public final class Profile {
 	private String uuid = "2250f5f7-e486-47d6-81c5-6b93efcd40af";
 	private String name = "unknownuser";
@@ -10,6 +12,7 @@ public final class Profile {
 	public Profile() {}
 
 	public Profile(String username) {
+		uuid = Util.getMd5(username);
 		name = username;
 	}
 
