@@ -5,18 +5,28 @@ import info.mineshafter.util.JarPatcher;
 import info.mineshafter.util.Resources;
 import info.mineshafter.util.Streams;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
@@ -26,7 +36,7 @@ public class Bootstrap extends JFrame {
 
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 13;
+	private static int mineshafterBootstrapVersion = 14;
 
 	public Bootstrap() {
 		super("Minecraft Launcher");
@@ -40,12 +50,20 @@ public class Bootstrap extends JFrame {
 	public static void main(String[] args) {
 		mainThread = Thread.currentThread();
 
+		bypassTls();
+
 		float v = Util.getCurrentBootstrapVersion();
 		System.out.println("Current proxy version: " + mineshafterBootstrapVersion);
 		System.out.println("Gotten proxy version: " + v);
 		if (mineshafterBootstrapVersion < v) {
-			JOptionPane.showMessageDialog(null, "A new version of Mineshafter is available at http://mineshafter.info/\nGo get it.", "Update Available", JOptionPane.PLAIN_MESSAGE);
-			System.exit(0);
+			JOptionPane.showMessageDialog(null, "A new version of Mineshafter is available at https://mineshafter.info/\nGo get it.", "Update Available", JOptionPane.PLAIN_MESSAGE);
+			try {
+				Desktop.getDesktop().browse(new URI("https://mineshafter.info/"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
 		}
 
 		Bootstrap frame = new Bootstrap();
@@ -61,6 +79,29 @@ public class Bootstrap extends JFrame {
 		ensurePatchedLauncherExists(launcherJar, patchedLauncherJar);
 		ensureGameStarterExists(starterJar);
 		startLauncher(workDir, frame, patchedLauncherJar);
+	}
+
+	private static void bypassTls() {
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+
+			public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+
+			public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+		} };
+
+		SSLContext sc;
+		try {
+			sc = SSLContext.getInstance("SSL");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (KeyManagementException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static void ensureLatestLauncherExists(File packedLauncherJar, File launcherJar) {

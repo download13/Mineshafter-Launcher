@@ -98,7 +98,7 @@ public class ProfileHandler implements Handler {
 		textureProperty.set("textures", textures);
 
 		String textureJSON = textureProperty.toString(); // Build the texture property info
-		System.out.println(textureJSON);
+		System.out.println("Texture JSON: " + textureJSON);
 
 		textureJSON = Base64Coder.encodeString(textureJSON); // Must be base64 encoded
 
@@ -113,7 +113,7 @@ public class ProfileHandler implements Handler {
 		profileResponse.set("properties", new JsonArray().add(profileProperty));
 
 		String response = profileResponse.toString();
-		System.out.println(response);
+		System.out.println("Profile JSON: " + response);
 
 		return response;
 	}

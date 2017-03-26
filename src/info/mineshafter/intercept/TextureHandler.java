@@ -53,6 +53,8 @@ public class TextureHandler implements Handler {
 
 	public Response handle(Request req) {
 		try {
+			System.out.println("TextureHandler.handle: " + req.getPath());
+
 			Matcher m = textureUrl.matcher(req.getPath());
 			m.matches();
 			String hash = m.group(1);
@@ -70,6 +72,8 @@ public class TextureHandler implements Handler {
 			byte[] data = new byte[0];
 			int responseCode = 404;
 			if (skinUrl != null) {
+				System.out.println("TextureHandler skinurl: " + skinUrl);
+
 				String protocol = skinUrl.getProtocol();
 				if (protocol.equalsIgnoreCase("https")) {
 					HttpsURLConnection conn = (HttpsURLConnection) skinUrl.openConnection();
@@ -84,9 +88,13 @@ public class TextureHandler implements Handler {
 					conn.setInstanceFollowRedirects(true);
 					responseCode = conn.getResponseCode();
 					data = Streams.toByteArray(conn.getInputStream());
-					if (data.length == 0) { return new Response(responseCode, data); }
 				}
+
+				System.out.println("Got " + Integer.toString(data.length) + " bytes of skin data");
+
+				if (data.length == 0) { return new Response(responseCode, data); }
 			} else {
+				System.out.println("TextureHandler 404");
 				return new Response(404, data);
 			}
 			System.out.println("Texture response code: " + responseCode);
