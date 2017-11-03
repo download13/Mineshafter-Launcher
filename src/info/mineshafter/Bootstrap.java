@@ -36,7 +36,7 @@ public class Bootstrap extends JFrame {
 
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 14;
+	private static int mineshafterBootstrapVersion = 15;
 
 	public Bootstrap() {
 		super("Minecraft Launcher");
@@ -143,6 +143,8 @@ public class Bootstrap extends JFrame {
 		}
 		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner.class", Resources.loadByteArray("resources/MinecraftGameRunner.class"));
 		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner$1.class", Resources.loadByteArray("resources/MinecraftGameRunner$1.class"));
+		patcher.setEntry("net/minecraft/launcher/updater/download/assets/AssetDownloadable.class", Resources.loadByteArray("resources/AssetDownloadable.class"));
+		patcher.setEntry("net/minecraft/launcher/updater/download/assets/AssetDownloadable$Status.class", Resources.loadByteArray("resources/AssetDownloadable$Status.class"));
 
 		//patcher.setEntry("info/mineshafter/mod/JarPatcher.class", Resources.loadByteArray("info/mineshafter/mod/JarPatcher.class"));
 		//patcher.setEntry("info/mineshafter/util/Streams.class", Resources.loadByteArray("info/mineshafter/util/Streams.class"));
