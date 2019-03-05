@@ -24,5 +24,7 @@ Steps to reproduce the behavior:
 4. Close Minecraft
 5. Attach or paste the `debug.txt` file contents here
 
+Alternatively just find your `.minecraft/logs/latest.log` file and it should already have the logs in it.
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
