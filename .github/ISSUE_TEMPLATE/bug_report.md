@@ -18,11 +18,11 @@ Steps to reproduce the behavior:
 4. See error
 
 **Generate debug output**
-Open a command prompt and `cd` to the directory where  you keep Mineshafter-launcher.jar
-Type `java -jar Mineshafter-launcher.jar > debug.txt`, press enter
-Re-create the error or problem
-Close Minecraft
-Attach or paste the `debug.txt` file contents here
+1. Open a command prompt and `cd` to the directory where  you keep Mineshafter-launcher.jar
+2. Type `java -jar Mineshafter-launcher.jar > debug.txt`, press enter
+3. Re-create the error or problem
+4. Close Minecraft
+5. Attach or paste the `debug.txt` file contents here
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
