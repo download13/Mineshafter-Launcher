@@ -58,7 +58,7 @@ public class YggdrasilImpersonator implements Handler {
 		String password = req.get("password").asString();
 		String clientToken = req.get("clientToken").asString();
 
-		String accessToken = Util.getMd5(username + password + Long.toString(System.currentTimeMillis()));
+		String accessToken = Util.getMd5AsUUID(username + password + Long.toString(System.currentTimeMillis()));
 
 		Profile profile = profiles.searchProfile(username);
 		JsonObject user = new JsonObject();

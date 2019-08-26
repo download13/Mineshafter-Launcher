@@ -66,7 +66,7 @@ public class Util {
 
 	public static boolean grabLauncher(String md5, File file, int tries) {
 		try {
-			URL url = new URL("http://s3.amazonaws.com/Minecraft.Download/launcher/launcher.pack.lzma");
+			URL url = new URL("https://s3.amazonaws.com/Minecraft.Download/launcher/launcher.pack.lzma");
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection(Proxy.NO_PROXY);
 
 			connection.setUseCaches(false);
@@ -127,6 +127,27 @@ public class Util {
 
 	public static String getMd5(String v) {
 		return Hash.md5(v);
+	}
+
+	public static String getMd5AsUUID(String v) {
+		return formatAsUUID(Hash.md5(v));
+	}
+
+	public static String formatAsUUID(String hash) {
+		if (hash.length() != 32) return hash;
+		return hash.substring(0, 8) + "-" + hash.substring(8, 12) + "-" + hash.substring(12, 16) + "-" + hash.substring(16, 20) + "-" + hash.substring(20, 32);
+	}
+
+	public static String ensureUUIDFormatted(String maybeuuid) {
+		int len = maybeuuid.length();
+
+		if (len == 36) return maybeuuid;
+		else if (len == 32) return formatAsUUID(maybeuuid);
+		else return getMd5AsUUID(maybeuuid);
+	}
+
+	public static String stripDashesUUID(String uuid) {
+		return uuid.replaceAll("-", "");
 	}
 
 	public static float getCurrentBootstrapVersion() {
