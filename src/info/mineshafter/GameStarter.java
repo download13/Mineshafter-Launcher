@@ -1,7 +1,5 @@
 package info.mineshafter;
 
-import info.mineshafter.hacks.URLHandlerFactory;
-
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -12,13 +10,14 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import info.mineshafter.hacks.URLHandlerFactory;
+
 public class GameStarter {
 	public static void main(String[] args) {
 		String className = args[0];
 		System.out.println("GameStarter running! " + className);
 
-		// Activate the hooks
-		URL.setURLStreamHandlerFactory(new URLHandlerFactory());
+		setupProtocolHandlers();
 
 		bypassTls();
 
@@ -34,6 +33,17 @@ public class GameStarter {
 		} catch (Exception e) {
 			System.out.println("Error while starting game:");
 			e.printStackTrace();
+		}
+	}
+
+	public static void setupProtocolHandlers() {
+		try {
+			URL.setURLStreamHandlerFactory(new URLHandlerFactory());
+			System.out.println("Protocol handlers patched");
+		} catch (Exception e) {
+			System.out.println("Error while setting up protocol handlers:");
+			e.printStackTrace();
+			return;
 		}
 	}
 

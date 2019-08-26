@@ -90,22 +90,21 @@ public class ProfileHandler implements Handler {
 		if (p.getCape() != null) {
 			textures.set("CAPE", new JsonObject().add("url", p.getCape()));
 		}
+
 		JsonObject textureProperty = new JsonObject();
 		textureProperty.set("timestamp", System.currentTimeMillis());
 		textureProperty.set("profileId", p.getId());
 		textureProperty.set("profileName", p.getName());
-		textureProperty.set("isPublic", true);
 		textureProperty.set("textures", textures);
 
 		String textureJSON = textureProperty.toString(); // Build the texture property info
 		System.out.println("Texture JSON: " + textureJSON);
 
-		textureJSON = Base64Coder.encodeString(textureJSON); // Must be base64 encoded
+		String encodedTextureJSON = Base64Coder.encodeString(textureJSON); // Must be base64 encoded
 
 		JsonObject profileProperty = new JsonObject();
 		profileProperty.set("name", "textures");
-		profileProperty.set("value", textureJSON);
-		profileProperty.set("signature", "");
+		profileProperty.set("value", encodedTextureJSON);
 
 		JsonObject profileResponse = new JsonObject();
 		profileResponse.set("id", p.getId());
@@ -119,7 +118,7 @@ public class ProfileHandler implements Handler {
 	}
 
 	private String searchProfile(int page, String body) {
-		System.out.println("Proxy: ProfileName");
+		System.out.println("Proxy: ProfileName " + body);
 
 		// Request comes as an array of objects {name: <username>, agent: 'Minecraft'}
 		JsonArray requests = JsonObject.readFrom(body).asArray();

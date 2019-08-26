@@ -1,10 +1,5 @@
 package info.mineshafter;
 
-import info.mineshafter.hacks.URLHandlerFactory;
-import info.mineshafter.util.JarPatcher;
-import info.mineshafter.util.Resources;
-import info.mineshafter.util.Streams;
-
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,12 +26,16 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 
+import info.mineshafter.util.JarPatcher;
+import info.mineshafter.util.Resources;
+import info.mineshafter.util.Streams;
+
 public class Bootstrap extends JFrame {
 	public static Thread mainThread;
 
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 15;
+	private static int mineshafterBootstrapVersion = 20;
 
 	public Bootstrap() {
 		super("Minecraft Launcher");
@@ -181,7 +180,7 @@ public class Bootstrap extends JFrame {
 		System.setErr(System.out);
 		System.setProperty("java.net.preferIPv4Stack", "true");
 
-		URL.setURLStreamHandlerFactory(new URLHandlerFactory());
+		info.mineshafter.GameStarter.setupProtocolHandlers();
 
 		try {
 			@SuppressWarnings("resource")
