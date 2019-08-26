@@ -1,7 +1,5 @@
 package info.mineshafter.intercept;
 
-import info.mineshafter.util.Streams;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -14,6 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import info.mineshafter.util.Streams;
 
 public class TextureHandler implements Handler {
 	private Map<String, URL> skinLookup = new ConcurrentHashMap<String, URL>();
@@ -109,9 +109,11 @@ public class TextureHandler implements Handler {
 
 	// Use the URL in the padding to make sure that when someone changes their skin, the cache doesn't keep serving the same one
 	public String addSkin(String id, String skinUrl) {
+		System.out.println("TextureHandler.addSkin(" + skinUrl + ")");
 		try {
 			URL url = new URL(skinUrl);
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile()); // Make sure we don't loop getting a handled url
+			System.out.println("normalize url " + url.toString());
 			skinLookup.put(id, url);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -120,14 +122,16 @@ public class TextureHandler implements Handler {
 
 		// id: 32 chars, idPadding: 14 chars, urlPadding: 14 chars, type: 1 char
 		String r = "http://textures.minecraft.net/" + id + createPadding(id) + createPadding(skinUrl) + "0";
-		//System.out.println(r + " = " + id + ":" + skinUrl);
+		System.out.println(r);
 		return r;
 	}
 
 	public String addCape(String id, String capeUrl) {
+		System.out.println("TextureHandler.addCape(" + capeUrl + ")");
 		try {
 			URL url = new URL(capeUrl);
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile());
+			System.out.println("normalize url " + url.toString());
 			capeLookup.put(id, url);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -135,7 +139,7 @@ public class TextureHandler implements Handler {
 		}
 
 		String r = "http://textures.minecraft.net/" + id + createPadding(id) + createPadding(capeUrl) + "1";
-		//System.out.println(r + " = " + id + ":" + capeUrl);
+		System.out.println(r);
 		return r;
 	}
 
