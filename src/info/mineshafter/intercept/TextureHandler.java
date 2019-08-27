@@ -53,7 +53,7 @@ public class TextureHandler implements Handler {
 
 	public Response handle(Request req) {
 		try {
-			System.out.println("TextureHandler.handle: " + req.getPath());
+			System.out.println("TextureHandler.handle: " + req.getPath().substring(1));
 
 			Matcher m = textureUrl.matcher(req.getPath());
 			m.matches();
@@ -77,14 +77,16 @@ public class TextureHandler implements Handler {
 				String protocol = skinUrl.getProtocol();
 				if (protocol.equalsIgnoreCase("https")) {
 					HttpsURLConnection conn = (HttpsURLConnection) skinUrl.openConnection();
-					conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
+					conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0");
+					conn.setRequestProperty("Accept", "image/*");
 					conn.setInstanceFollowRedirects(true);
 					responseCode = conn.getResponseCode();
 					data = Streams.toByteArray(conn.getInputStream());
 
 				} else if (protocol.equalsIgnoreCase("http")) {
 					HttpURLConnection conn = (HttpURLConnection) skinUrl.openConnection();
-					conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393");
+					conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0");
+					conn.setRequestProperty("Accept", "image/*");
 					conn.setInstanceFollowRedirects(true);
 					responseCode = conn.getResponseCode();
 					data = Streams.toByteArray(conn.getInputStream());
@@ -109,7 +111,7 @@ public class TextureHandler implements Handler {
 
 	// Use the URL in the padding to make sure that when someone changes their skin, the cache doesn't keep serving the same one
 	public String addSkin(String id, String skinUrl) {
-		System.out.println("TextureHandler.addSkin(" + skinUrl + ")");
+		System.out.println("TextureHandler.addSkin( " + skinUrl + " )");
 		try {
 			URL url = new URL(skinUrl);
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile()); // Make sure we don't loop getting a handled url
@@ -127,7 +129,7 @@ public class TextureHandler implements Handler {
 	}
 
 	public String addCape(String id, String capeUrl) {
-		System.out.println("TextureHandler.addCape(" + capeUrl + ")");
+		System.out.println("TextureHandler.addCape( " + capeUrl + " )");
 		try {
 			URL url = new URL(capeUrl);
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile());

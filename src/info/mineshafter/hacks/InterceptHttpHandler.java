@@ -1,15 +1,15 @@
 package info.mineshafter.hacks;
 
-import info.mineshafter.intercept.Handler;
-import info.mineshafter.intercept.TextureHandler;
-
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 
+import info.mineshafter.intercept.Handler;
+import info.mineshafter.intercept.TextureHandler;
+
 public class InterceptHttpHandler extends sun.net.www.protocol.http.Handler {
-	private static Handler[] handlers = new Handler[] {TextureHandler.getInstance() };
+	private static Handler[] handlers = new Handler[] { TextureHandler.getInstance() };
 
 	@Override
 	protected URLConnection openConnection(URL u) throws IOException {

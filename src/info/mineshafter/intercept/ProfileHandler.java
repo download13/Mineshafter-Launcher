@@ -1,17 +1,16 @@
 package info.mineshafter.intercept;
 
-import info.mineshafter.datasources.MineshafterProfileAuthority;
-import info.mineshafter.models.Profile;
-
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import biz.source_code.base64Coder.Base64Coder;
-
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+
+import biz.source_code.base64Coder.Base64Coder;
+import info.mineshafter.datasources.MineshafterProfileAuthority;
+import info.mineshafter.models.Profile;
 
 public class ProfileHandler implements Handler {
 	private static String SEARCH_HOST = "api.mojang.com";
@@ -84,10 +83,14 @@ public class ProfileHandler implements Handler {
 		Profile p = profiles.getProfile(id);
 
 		JsonObject textures = new JsonObject();
-		if (p.getSkin() != null) {
+		String skin = p.getSkin();
+		String cape = p.getCape();
+		if (skin != null && skin.length() > 0) {
+			System.out.println("profile skin: " + p.getSkin());
 			textures.set("SKIN", new JsonObject().add("url", p.getSkin()));
 		}
-		if (p.getCape() != null) {
+		if (cape != null && cape.length() > 0) {
+			System.out.println("profile cape: " + p.getCape());
 			textures.set("CAPE", new JsonObject().add("url", p.getCape()));
 		}
 

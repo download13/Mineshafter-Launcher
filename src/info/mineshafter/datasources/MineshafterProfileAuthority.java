@@ -1,10 +1,5 @@
 package info.mineshafter.datasources;
 
-import info.mineshafter.Util;
-import info.mineshafter.intercept.TextureHandler;
-import info.mineshafter.models.Profile;
-import info.mineshafter.util.Streams;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -17,6 +12,11 @@ import javax.net.ssl.HttpsURLConnection;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
+
+import info.mineshafter.Util;
+import info.mineshafter.intercept.TextureHandler;
+import info.mineshafter.models.Profile;
+import info.mineshafter.util.Streams;
 
 public class MineshafterProfileAuthority {
 	private static final String API_URL = "https://mineshafter.info/mcapi/profile";

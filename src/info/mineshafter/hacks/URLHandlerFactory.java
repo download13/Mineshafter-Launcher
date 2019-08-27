@@ -1,14 +1,10 @@
 package info.mineshafter.hacks;
 
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
 public class URLHandlerFactory implements URLStreamHandlerFactory {
 	public URLStreamHandler createURLStreamHandler(String protocol) {
-		System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
 		// If protocol is HTTP or HTTPS check if we want to intercept
 		if (protocol.equalsIgnoreCase("http")) {
 			return new InterceptHttpHandler();
