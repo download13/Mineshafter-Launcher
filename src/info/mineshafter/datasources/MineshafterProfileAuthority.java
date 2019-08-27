@@ -15,6 +15,7 @@ import com.eclipsesource.json.ParseException;
 
 import info.mineshafter.Util;
 import info.mineshafter.intercept.TextureHandler;
+import info.mineshafter.models.CharacterModel;
 import info.mineshafter.models.Profile;
 import info.mineshafter.util.Streams;
 
@@ -57,6 +58,7 @@ public class MineshafterProfileAuthority {
 			Profile p = new Profile(pj.get("username").asString(), uuid);
 			JsonValue skinVal = pj.get("skin");
 			JsonValue capeVal = pj.get("cape");
+			JsonValue modelVal = pj.get("model");
 
 			String url;
 			if (skinVal != null && !skinVal.isNull() && !skinVal.asString().isEmpty()) {
@@ -67,6 +69,15 @@ public class MineshafterProfileAuthority {
 			if (capeVal != null && !capeVal.isNull() && !capeVal.asString().isEmpty()) {
 				url = textureHandler.addCape(uuid, capeVal.asString());
 				p.setCape(url);
+			}
+
+			if (modelVal != null && !modelVal.isNull()) {
+				String model = modelVal.asString();
+				if (model.equals("slim")) {
+					p.setModel(CharacterModel.SLIM);
+				} else {
+					p.setModel(CharacterModel.CLASSIC);
+				}
 			}
 
 			return p;

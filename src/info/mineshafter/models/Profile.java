@@ -8,6 +8,7 @@ public final class Profile {
 	private String accessToken = "305557da-72fa-4ff6-b373-1e92c6556d48";
 	private String skinUrl = "";
 	private String capeUrl = "";
+	private CharacterModel model = CharacterModel.CLASSIC;
 
 	public Profile() {}
 
@@ -55,5 +56,13 @@ public final class Profile {
 
 	public void setCape(String capeurl) {
 		capeUrl = capeurl;
+	}
+
+	public CharacterModel getModel() {
+		return this.model;
+	}
+
+	public void setModel(CharacterModel m) {
+		this.model = m;
 	}
 }

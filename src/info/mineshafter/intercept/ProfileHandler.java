@@ -10,6 +10,7 @@ import com.eclipsesource.json.JsonValue;
 
 import biz.source_code.base64Coder.Base64Coder;
 import info.mineshafter.datasources.MineshafterProfileAuthority;
+import info.mineshafter.models.CharacterModel;
 import info.mineshafter.models.Profile;
 
 public class ProfileHandler implements Handler {
@@ -87,7 +88,12 @@ public class ProfileHandler implements Handler {
 		String cape = p.getCape();
 		if (skin != null && skin.length() > 0) {
 			System.out.println("profile skin: " + p.getSkin());
-			textures.set("SKIN", new JsonObject().add("url", p.getSkin()));
+			JsonObject skinObj = new JsonObject();
+			skinObj.add("url", p.getSkin());
+			if (p.getModel() == CharacterModel.SLIM) {
+				skinObj.add("metadata", new JsonObject().add("model", "slim"));
+			}
+			textures.set("SKIN", skinObj);
 		}
 		if (cape != null && cape.length() > 0) {
 			System.out.println("profile cape: " + p.getCape());

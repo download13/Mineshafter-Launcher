@@ -35,7 +35,7 @@ public class Bootstrap extends JFrame {
 
 	private static final long serialVersionUID = 1;
 	private static int bootstrapVersion = 4;
-	private static int mineshafterBootstrapVersion = 20;
+	private static int mineshafterBootstrapVersion = 21;
 
 	public Bootstrap() {
 		super("Minecraft Launcher");
