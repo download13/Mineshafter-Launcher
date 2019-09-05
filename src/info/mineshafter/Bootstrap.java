@@ -144,10 +144,7 @@ public class Bootstrap extends JFrame {
 		patcher.setEntry("net/minecraft/launcher/game/MinecraftGameRunner$1.class", Resources.loadByteArray("resources/MinecraftGameRunner$1.class"));
 		patcher.setEntry("net/minecraft/launcher/updater/download/assets/AssetDownloadable.class", Resources.loadByteArray("resources/AssetDownloadable.class"));
 		patcher.setEntry("net/minecraft/launcher/updater/download/assets/AssetDownloadable$Status.class", Resources.loadByteArray("resources/AssetDownloadable$Status.class"));
-
-		//patcher.setEntry("info/mineshafter/mod/JarPatcher.class", Resources.loadByteArray("info/mineshafter/mod/JarPatcher.class"));
-		//patcher.setEntry("info/mineshafter/util/Streams.class", Resources.loadByteArray("info/mineshafter/util/Streams.class"));
-		//patcher.setEntry("info/mineshafter/util/Resources.class", Resources.loadByteArray("info/mineshafter/util/Resources.class"));
+		patcher.setEntry("net/minecraft/launcher/updater/DownloadType.class", Resources.loadByteArray("resources/DownloadType.class"));
 
 		patcher.write(patchedLauncherJar);
 	}
