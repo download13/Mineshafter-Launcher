@@ -26,6 +26,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 
+import info.mineshafter.hacks.URLHandlerFactory;
 import info.mineshafter.util.JarPatcher;
 import info.mineshafter.util.Resources;
 import info.mineshafter.util.Streams;
@@ -177,7 +178,7 @@ public class Bootstrap extends JFrame {
 		System.setErr(System.out);
 		System.setProperty("java.net.preferIPv4Stack", "true");
 
-		info.mineshafter.GameStarter.setupProtocolHandlers();
+		URL.setURLStreamHandlerFactory(new URLHandlerFactory());
 
 		try {
 			@SuppressWarnings("resource")

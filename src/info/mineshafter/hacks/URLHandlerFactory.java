@@ -4,6 +4,8 @@ import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
 public class URLHandlerFactory implements URLStreamHandlerFactory {
+	private URLStreamHandlerFactory previousFactory = null;
+
 	public URLStreamHandler createURLStreamHandler(String protocol) {
 		// If protocol is HTTP or HTTPS check if we want to intercept
 		if (protocol.equalsIgnoreCase("http")) {
@@ -20,30 +22,14 @@ public class URLHandlerFactory implements URLStreamHandlerFactory {
 			//return this.getDefaultHandler("https");
 		}
 
-		return this.getDefaultHandler(protocol);
+		if (this.previousFactory != null) { return this.previousFactory.createURLStreamHandler(protocol); }
+
+		return null;
 
 	}
 
-	private URLStreamHandler getDefaultHandler(String protocol) {
-		System.out.println("getDefaultHandler " + protocol);
-
-		ClassLoader cl = ClassLoader.getSystemClassLoader();
-
-		Class<?> cls;
-		try {
-			cls = cl.loadClass("sun.net.www.protocol." + protocol + ".Handler");
-
-			return (URLStreamHandler) cls.newInstance();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-			return null;
-		}
+	public void setPreviousFactory(URLStreamHandlerFactory factory) {
+		this.previousFactory = factory;
 	}
 
 }
